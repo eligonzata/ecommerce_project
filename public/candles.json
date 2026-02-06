@@ -1,0 +1,542 @@
+[
+  {
+    "id": 1,
+    "name": "Ethereal Lavender Candle",
+    "blurb": "A soothing lavender candle.",
+    "description": "Immerse yourself in the calming aroma of pure lavender with our Ethereal Lavender Candle. Hand-poured with natural soy wax, this candle burns cleanly and evenly for up to 50 hours. Perfect for relaxation, meditation, or adding a serene touch to your home. The soothing lavender fragrance is complemented by subtle hints of chamomile and eucalyptus, making it ideal for winding down after a long day.",
+    "image": "/img/eth_Lavender.jpg",
+    "price": "$12.99",
+    "tags": ["floral", "popular", "EVERYTHING"]
+  },
+  {
+    "id": 2,
+    "name": "Citrus Grove Scented Candle",
+    "blurb": "A refreshing citrus candle.",
+    "description": "Brighten up any room with the refreshing, uplifting scent of Citrus Grove. This zesty blend of lemon, orange, and grapefruit will invigorate your senses and leave your space smelling fresh and lively. Made with a blend of eco-friendly soy wax and essential oils, this candle burns for up to 45 hours and creates a revitalizing atmosphere perfect for kitchens, bathrooms, or anywhere you need an energy boost.",
+    "image": "/img/citrus_grove.jpg",
+    "price": "$14.99",
+    "tags": ["fruity", "fresh", "EVERYTHING"]
+  },
+  {
+    "id": 3,
+    "name": "Woodland Candle",
+    "blurb": "A rich, earthy scent candle.",
+    "description": "Bring the outdoors in with the rich, earthy scent of the Woodland Candle. A perfect blend of pine, cedarwood, and oakmoss, this candle evokes the serene, fresh air of a forest hike. Whether you're curling up with a book or hosting a cozy gathering, the warm, woodsy aroma creates an inviting and tranquil environment. Hand-poured with premium soy wax and a lead-free cotton wick for an eco-conscious, long-lasting burn of up to 60 hours.",
+    "image": "/img/woodland_candle.png",
+    "price": "$13.99",
+    "tags": ["woody", "popular", "EVERYTHING"]
+  },
+  {
+    "id": 4,
+    "name": "Tropical Mango Bliss",
+    "blurb": "A tropical mango candle.",
+    "description": "Transport yourself to a tropical paradise with our Mango Bliss candle. The juicy scent of ripe mango combined with hints of pineapple and papaya makes this candle a fruity delight. Crafted with natural soy wax for a smooth burn and a lead-free cotton wick for safety, this candle burns up to 50 hours.",
+    "image": "/img/mango_bliss.jpg",
+    "price": "$15.49",
+    "tags": ["fruity", "trendy", "EVERYTHING"]
+  },
+  {
+    "id": 5,
+    "name": "Warm Vanilla Sugar",
+    "blurb": "A sweet vanilla candle.",
+    "description": "Indulge in the comforting scent of warm vanilla sugar. Our vanilla candle is crafted to emit a soft, sweet fragrance that lingers, perfect for cozy nights in. Made with a blend of soy and beeswax, this candle has a burn time of up to 40 hours, enhancing any space with a touch of warmth and sweetness.",
+    "image": "/img/wam_vanilla_sugar.jpg",
+    "price": "$13.99",
+    "tags": ["sweet", "popular", "EVERYTHING"]
+  },
+  {
+    "id": 6,
+    "name": "Cinnamon Spice Delight",
+    "blurb": "A cozy cinnamon spice candle.",
+    "description": "Our Cinnamon Spice Delight candle brings the warmth of cinnamon, cloves, and nutmeg to your home. This candle is perfect for fall and winter, evoking a sense of coziness and holiday spirit. Handcrafted with eco-friendly soy wax, it burns cleanly for up to 55 hours, filling your space with a comforting, spicy aroma.",
+    "image": "/img/cinnamon_candle.jpg",
+    "price": "$14.99",
+    "tags": ["spicy", "seasonal", "EVERYTHING"]
+  },
+  {
+    "id": 7,
+    "name": "Ocean Breeze",
+    "blurb": "A fresh ocean breeze candle.",
+    "description": "Bring the calming and refreshing scent of the ocean into your home. Our Ocean Breeze candle is infused with notes of sea salt, fresh water, and driftwood. Perfect for creating a spa-like ambiance, this candle offers a soothing, long-lasting burn of up to 45 hours with its premium soy wax blend.",
+    "image": "/img/ocean_breeze.jpg",
+    "price": "$12.49",
+    "tags": ["fresh", "trendy", "EVERYTHING"]
+  },
+  {
+    "id": 8,
+    "name": "Apple Harvest Candle",
+    "blurb": "A crisp apple candle.",
+    "description": "Enjoy the delightful scent of fresh apples with a hint of spice. The Apple Harvest candle combines the fragrances of ripe apples, cinnamon, and cloves to evoke the essence of autumn orchards. Made with soy wax, this candle provides a clean, safe burn for up to 50 hours.",
+    "image": "/img/apple_harvest.jpg",
+    "price": "$13.49",
+    "tags": ["fruity", "spicy", "EVERYTHING"]
+  },
+  {
+    "id": 9,
+    "name": "Midnight Jasmine",
+    "blurb": "An exotic jasmine candle.",
+    "description": "Our Midnight Jasmine candle offers an exotic, floral scent that’s both delicate and enticing. With subtle undertones of musk and white lily, this candle is perfect for adding a touch of elegance to any room. Made with soy wax, it has a burn time of up to 40 hours.",
+    "image": "/img/midnight_jasmine.jpg",
+    "price": "$12.99",
+    "tags": ["floral", "trendy", "EVERYTHING"]
+  },
+  {
+    "id": 10,
+    "name": "Gingerbread House",
+    "blurb": "A festive gingerbread candle.",
+    "description": "Celebrate the holidays with the warm, spicy scent of gingerbread cookies straight from the oven. Our Gingerbread House candle combines the fragrances of ginger, nutmeg, and brown sugar to create a nostalgic holiday atmosphere. Burns cleanly for up to 50 hours.",
+    "image": "/img/gingerbread_house.jpg",
+    "price": "$14.99",
+    "tags": ["spicy", "seasonal", "EVERYTHING"]
+  },
+  {
+    "id": 11,
+    "name": "Sweet Peony Blossom",
+    "blurb": "A delicate peony blossom candle.",
+    "description": "Bring a touch of floral elegance to your space with our Sweet Peony Blossom candle. This candle exudes the lush, romantic scent of peonies, complemented by hints of rose and jasmine. Ideal for adding a serene, sophisticated ambiance to your home, this candle burns for up to 50 hours.",
+    "image": "/img/sweet_peony.jpg",
+    "price": "$13.99",
+    "tags": ["floral", "popular", "EVERYTHING"]
+  },
+  {
+    "id": 12,
+    "name": "Wood Sage & Sea Salt",
+    "blurb": "An earthy sage and sea salt candle.",
+    "description": "Our Wood Sage & Sea Salt candle offers an earthy, coastal fragrance with hints of driftwood and sea salt. This candle brings a fresh and calming vibe to any space, perfect for unwinding after a long day. Burns cleanly for up to 50 hours with natural soy wax.",
+    "image": "/img/woodsage_seasalt.png",
+    "price": "$14.49",
+    "tags": ["woody", "fresh", "EVERYTHING"]
+  },
+  {
+    "id": 13,
+    "name": "Golden Amber Glow",
+    "blurb": "A warm amber candle.",
+    "description": "Experience the comforting glow of our Golden Amber Glow candle. With notes of amber, sandalwood, and vanilla, this candle creates a cozy and inviting atmosphere. Burns for up to 50 hours with eco-friendly soy wax.",
+    "image": "/img/golden_amber_glow.jpg",
+    "price": "$15.49",
+    "tags": ["woody", "cozy", "EVERYTHING"]
+  },
+  {
+    "id": 14,
+    "name": "Berry Bliss",
+    "blurb": "A sweet berry candle.",
+    "description": "Our Berry Bliss candle combines the fragrances of ripe blueberries, blackberries, and raspberries. Perfect for fruity scent lovers, this candle burns cleanly for up to 45 hours.",
+    "image": "/img/berry_bliss.jpg",
+    "price": "$12.99",
+    "tags": ["fruity", "trendy", "EVERYTHING"]
+  },
+  {
+    "id": 15,
+    "name": "Autumn Leaves",
+    "blurb": "A crisp autumn candle.",
+    "description": "Capture the essence of fall with our Autumn Leaves candle. Featuring notes of crisp apples, cedarwood, and cinnamon, this candle brings the beauty of autumn indoors. Burns for up to 50 hours.",
+    "image": "/img/autumn_leaves.jpg",
+    "price": "$14.99",
+    "tags": ["seasonal", "cozy", "EVERYTHING"]
+  },
+  {
+    "id": 16,
+    "name": "Honeysuckle Haven",
+    "blurb": "A fresh honeysuckle candle.",
+    "description": "Bask in the delicate, sweet scent of honeysuckle blossoms. Our Honeysuckle Haven candle is perfect for brightening any room with its uplifting floral fragrance. Burns for up to 40 hours.",
+    "image": "/img/honeysuckle_haven.jpg",
+    "price": "$13.49",
+    "tags": ["floral", "fresh", "EVERYTHING"]
+  },
+  {
+    "id": 17,
+    "name": "Sandalwood Serenity",
+    "blurb": "A calming sandalwood candle.",
+    "description": "Our Sandalwood Serenity candle offers a grounding and relaxing scent with notes of sandalwood and patchouli. Perfect for meditation or creating a serene space, it burns for up to 50 hours.",
+    "image": "/img/sandalwood_serenity.jpg",
+    "price": "$15.49",
+    "tags": ["woody", "relaxing", "EVERYTHING"]
+  },
+  {
+    "id": 18,
+    "name": "Cherry Blossom Dream",
+    "blurb": "A light cherry blossom candle.",
+    "description": "Bring the elegance of cherry blossoms into your home with this delicate and uplifting candle. Infused with subtle floral notes, it burns for up to 40 hours.",
+    "image": "/img/cherry_blossom_dream.jpg",
+    "price": "$14.49",
+    "tags": ["floral", "popular", "EVERYTHING"]
+  },
+  {
+    "id": 19,
+    "name": "Pumpkin Spice Candle",
+    "blurb": "A cozy pumpkin spice candle.",
+    "description": "Celebrate fall with our Pumpkin Spice Candle. Featuring the warm scents of pumpkin, cinnamon, and nutmeg, this candle is a seasonal favorite. Burns for up to 50 hours.",
+    "image": "/img/pumpkin_spice.jpg",
+    "price": "$13.99",
+    "tags": ["spicy", "seasonal", "EVERYTHING"]
+  },
+  {
+    "id": 20,
+    "name": "Rose Garden Candle",
+    "blurb": "A luxurious rose candle.",
+    "description": "Enjoy the luxurious scent of freshly picked roses with our Rose Garden Candle. Perfect for adding a touch of romance, this candle burns for up to 40 hours.",
+    "image": "/img/rose_garden.jpg",
+    "price": "$12.99",
+    "tags": ["floral", "romantic", "EVERYTHING"]
+  },
+  {
+    "id": 21,
+    "name": "Eucalyptus Escape",
+    "blurb": "A refreshing eucalyptus candle.",
+    "description": "Our Eucalyptus Escape candle combines the invigorating scent of eucalyptus with hints of mint and rosemary. Ideal for creating a spa-like ambiance, it burns for up to 45 hours.",
+    "image": "/img/eucalyptus_escape.jpg",
+    "price": "$13.49",
+    "tags": ["fresh", "relaxing", "EVERYTHING"]
+  },
+  {
+    "id": 22,
+    "name": "Coconut Paradise",
+    "blurb": "A tropical coconut candle.",
+    "description": "Transport yourself to a tropical beach with our Coconut Paradise candle. The creamy scent of coconut with hints of vanilla and pineapple creates a dreamy escape. Burns for up to 50 hours.",
+    "image": "/img/coconut_paradise.jpg",
+    "price": "$14.99",
+    "tags": ["fruity", "tropical", "EVERYTHING"]
+  },
+  {
+    "id": 23,
+    "name": "Amber Noir",
+    "blurb": "A mysterious amber candle.",
+    "description": "Our Amber Noir candle offers a deep, mysterious scent with notes of amber, musk, and vanilla. Perfect for creating a cozy, elegant ambiance, it burns for up to 50 hours.",
+    "image": "/img/amber_noir.jpg",
+    "price": "$15.49",
+    "tags": ["woody", "romantic", "EVERYTHING"]
+  },
+  {
+    "id": 24,
+    "name": "Lemongrass Bliss",
+    "blurb": "A refreshing lemongrass candle.",
+    "description": "Brighten your space with the invigorating scent of lemongrass. This candle burns cleanly for up to 45 hours, providing a fresh and uplifting atmosphere.",
+    "image": "/img/lemongrass_bliss.jpg",
+    "price": "$12.99",
+    "tags": ["fresh", "trendy", "EVERYTHING"]
+  },
+  {
+    "id": 25,
+    "name": "Spiced Apple Cider",
+    "blurb": "A warm apple cider candle.",
+    "description": "Enjoy the cozy scent of apple cider spiced with cinnamon and cloves. Perfect for fall and winter, this candle burns for up to 50 hours.",
+    "image": "/img/spiced_cider.jpg",
+    "price": "$13.49",
+    "tags": ["seasonal", "spicy", "EVERYTHING"]
+  },
+  {
+    "id": 26,
+    "name": "Vanilla Bean Comfort",
+    "blurb": "A creamy vanilla bean candle.",
+    "description": "Indulge in the rich, creamy scent of vanilla bean. This candle is perfect for creating a warm and inviting atmosphere, burning for up to 40 hours.",
+    "image": "/img/vanilla_bean.jpg",
+    "price": "$12.49",
+    "tags": ["sweet", "popular", "EVERYTHING"]
+  },
+  {
+    "id": 27,
+    "name": "Minty Meadows",
+    "blurb": "A refreshing minty candle.",
+    "description": "Our Minty Meadows candle features a fresh and invigorating mint scent, perfect for revitalizing your space. Enhanced with subtle hints of eucalyptus, this candle burns for up to 40 hours.",
+    "image": "/img/minty_meadows.jpg",
+    "price": "$13.99",
+    "tags": ["fresh", "relaxing", "EVERYTHING"]
+  },
+  {
+    "id": 28,
+    "name": "Cranberry Frost",
+    "blurb": "A tart cranberry candle.",
+    "description": "Enjoy the crisp, tart scent of fresh cranberries with our Cranberry Frost candle. This seasonal favorite burns cleanly for up to 45 hours, adding a festive touch to your home.",
+    "image": "/img/cranberry_frost.jpg",
+    "price": "$14.49",
+    "tags": ["fruity", "seasonal", "EVERYTHING"]
+  },
+  {
+    "id": 29,
+    "name": "Velvet Rosewood",
+    "blurb": "A luxurious rosewood candle.",
+    "description": "Our Velvet Rosewood candle combines the elegance of rose petals with the rich, woody scent of rosewood. This sophisticated fragrance burns for up to 50 hours.",
+    "image": "/img/velvet_rosewood.jpg",
+    "price": "$15.49",
+    "tags": ["floral", "woody", "EVERYTHING"]
+  },
+  {
+    "id": 30,
+    "name": "Frosted Pine",
+    "blurb": "A wintry pine candle.",
+    "description": "Bring the outdoors in with our Frosted Pine candle. Featuring notes of evergreen, cedar, and fir, this candle is perfect for creating a festive, wintry ambiance. Burns for up to 55 hours.",
+    "image": "/img/frosted_pine.jpg",
+    "price": "$14.99",
+    "tags": ["woody", "seasonal", "EVERYTHING"]
+  },
+  {
+    "id": 31,
+    "name": "Lush Gardenia",
+    "blurb": "A delicate gardenia candle.",
+    "description": "Capture the timeless elegance of gardenia blossoms with this lush floral candle. Perfect for adding a touch of sophistication to any room, this candle burns for up to 40 hours.",
+    "image": "/img/lush_gardenia.jpg",
+    "price": "$13.49",
+    "tags": ["floral", "romantic", "EVERYTHING"]
+  },
+  {
+    "id": 32,
+    "name": "Espresso Delight",
+    "blurb": "A bold espresso candle.",
+    "description": "Bring the cozy aroma of a coffee shop to your home with our Espresso Delight candle. Featuring the bold scent of freshly brewed espresso, this candle burns for up to 40 hours.",
+    "image": "/img/espresso_delight.jpg",
+    "price": "$14.99",
+    "tags": ["cozy", "unique", "EVERYTHING"]
+  },
+  {
+    "id": 33,
+    "name": "Blackberry Vanilla",
+    "blurb": "A sweet blackberry candle.",
+    "description": "Our Blackberry Vanilla candle combines the juicy scent of ripe blackberries with the creamy sweetness of vanilla. Burns cleanly for up to 50 hours.",
+    "image": "/img/blackberry_vanilla.jpg",
+    "price": "$13.99",
+    "tags": ["fruity", "sweet", "EVERYTHING"]
+  },
+  {
+    "id": 34,
+    "name": "Amber Musk",
+    "blurb": "An alluring amber candle.",
+    "description": "Our Amber Musk candle offers a deep, captivating scent with notes of amber, musk, and patchouli. Perfect for creating an intimate ambiance, it burns for up to 45 hours.",
+    "image": "/img/amber_musk.jpg",
+    "price": "$15.49",
+    "tags": ["woody", "romantic", "EVERYTHING"]
+  },
+  {
+    "id": 35,
+    "name": "Cucumber Melon Breeze",
+    "blurb": "A light cucumber candle.",
+    "description": "Experience the refreshing and clean scent of cucumber and melon. This candle creates a spa-like ambiance and burns for up to 40 hours.",
+    "image": "/img/cucumber_melon.jpg",
+    "price": "$12.99",
+    "tags": ["fresh", "fruity", "EVERYTHING"]
+  },
+  {
+    "id": 36,
+    "name": "Cedarwood Bliss",
+    "blurb": "A calming cedarwood candle.",
+    "description": "Our Cedarwood Bliss candle offers a grounding scent with notes of cedar, sandalwood, and amber. Perfect for unwinding, it burns for up to 50 hours.",
+    "image": "/img/cedarwood_bliss.jpg",
+    "price": "$15.99",
+    "tags": ["woody", "relaxing", "EVERYTHING"]
+  },
+  {
+    "id": 37,
+    "name": "Peach Bellini",
+    "blurb": "A sweet peach candle.",
+    "description": "Bring the sweetness of summer to your home with our Peach Bellini candle. Featuring juicy peach notes with a hint of champagne, this candle burns for up to 45 hours.",
+    "image": "/img/peach_bellini.jpg",
+    "price": "$13.49",
+    "tags": ["fruity", "sweet", "EVERYTHING"]
+  },
+  {
+    "id": 38,
+    "name": "Midnight Forest",
+    "blurb": "A deep forest candle.",
+    "description": "Our Midnight Forest candle evokes the essence of a serene, moonlit forest with notes of pine, moss, and bergamot. Burns cleanly for up to 55 hours.",
+    "image": "/img/midnight_forest.jpg",
+    "price": "$14.99",
+    "tags": ["woody", "cozy", "EVERYTHING"]
+  },
+  {
+    "id": 39,
+    "name": "Coconut Lime Escape",
+    "blurb": "A tropical lime candle.",
+    "description": "Our Coconut Lime Escape candle combines the creamy scent of coconut with the zesty freshness of lime. Perfect for a tropical getaway at home, it burns for up to 50 hours.",
+    "image": "/img/coconut_lime.jpg",
+    "price": "$13.99",
+    "tags": ["fruity", "fresh", "EVERYTHING"]
+  },
+  {
+    "id": 40,
+    "name": "Sugared Plum",
+    "blurb": "A sweet plum candle.",
+    "description": "Enjoy the rich, sweet aroma of sugared plums with our Sugared Plum candle. This fruity favorite burns for up to 40 hours and adds a cozy charm to any space.",
+    "image": "/img/sugared_plum.jpg",
+    "price": "$14.49",
+    "tags": ["fruity", "sweet", "EVERYTHING"]
+  },
+  {
+    "id": 41,
+    "name": "Jasmine & Bergamot",
+    "blurb": "A floral jasmine candle.",
+    "description": "Our Jasmine & Bergamot candle blends delicate jasmine with the citrusy freshness of bergamot. This uplifting floral candle burns cleanly for up to 40 hours.",
+    "image": "/img/jasmine_bergamot.jpg",
+    "price": "$13.49",
+    "tags": ["floral", "fresh", "EVERYTHING"]
+  },
+  {
+    "id": 42,
+    "name": "Toasted Marshmallow",
+    "blurb": "A sweet marshmallow candle.",
+    "description": "Bring the campfire indoors with the comforting scent of our Toasted Marshmallow candle. Featuring warm vanilla and sugary marshmallow notes, it burns for up to 45 hours.",
+    "image": "/img/toasted_marshmallow.jpg",
+    "price": "$14.99",
+    "tags": ["sweet", "cozy", "EVERYTHING"]
+  },
+  {
+    "id": 43,
+    "name": "Citrus Basil Bliss",
+    "blurb": "A zesty basil candle.",
+    "description": "Brighten your day with our Citrus Basil Bliss candle, featuring a refreshing mix of lemon, orange, and fresh basil. This candle burns cleanly for up to 50 hours.",
+    "image": "/img/citrus_basil.jpg",
+    "price": "$13.99",
+    "tags": ["fresh", "fruity", "EVERYTHING"]
+  },
+  {
+    "id": 44,
+    "name": "Winter Wonderland",
+    "blurb": "A festive winter candle.",
+    "description": "Capture the magic of winter with our Winter Wonderland candle. Notes of frosty pine, cinnamon, and vanilla create a festive atmosphere. Burns for up to 55 hours.",
+    "image": "/img/winter_wonderland.jpg",
+    "price": "$14.49",
+    "tags": ["seasonal", "woody", "EVERYTHING"]
+  },
+  {
+    "id": 45,
+    "name": "Amber & Vanilla Harmony",
+    "blurb": "A sweet vanilla candle.",
+    "description": "Our Amber & Vanilla Harmony candle combines warm amber notes with the creamy sweetness of vanilla. This elegant scent burns for up to 50 hours.",
+    "image": "/img/amber_vanilla.jpg",
+    "price": "$14.99",
+    "tags": ["woody", "sweet", "EVERYTHING"]
+  },
+  {
+    "id": 46,
+    "name": "Rosemary Citrus Glow",
+    "blurb": "A herbal citrus candle.",
+    "description": "Our Rosemary Citrus Glow candle blends fresh rosemary with zesty orange and lemon for a refreshing and herbal aroma. Burns cleanly for up to 40 hours.",
+    "image": "/img/rosemary_citrus.jpg",
+    "price": "$13.99",
+    "tags": ["herbal", "fresh", "EVERYTHING"]
+  },
+  {
+    "id": 47,
+    "name": "Spiced Cranberry",
+    "blurb": "A tart and spicy cranberry candle.",
+    "description": "Celebrate the holidays with the vibrant scent of Spiced Cranberry. Featuring notes of tart cranberries, cinnamon, and cloves, this candle burns for up to 50 hours, adding a festive warmth to any space.",
+    "image": "/img/spiced_cranberry.jpg",
+    "price": "$13.99",
+    "tags": ["spicy", "seasonal", "EVERYTHING"]
+  },
+  {
+    "id": 48,
+    "name": "Vanilla Chai Comfort",
+    "blurb": "A soothing chai candle.",
+    "description": "Cozy up with the warm and spicy scent of Vanilla Chai. This candle combines the creamy sweetness of vanilla with aromatic chai spices for a soothing ambiance. Burns cleanly for up to 45 hours.",
+    "image": "/img/vanilla_chai.jpg",
+    "price": "$14.49",
+    "tags": ["sweet", "spicy", "EVERYTHING"]
+  },
+  {
+    "id": 49,
+    "name": "Lilac Bloom",
+    "blurb": "A fresh lilac candle.",
+    "description": "Bring the gentle scent of spring indoors with our Lilac Bloom candle. Perfect for adding a serene floral ambiance, this candle burns for up to 40 hours.",
+    "image": "/img/lilac_bloom.jpg",
+    "price": "$12.99",
+    "tags": ["floral", "popular", "EVERYTHING"]
+  },
+  {
+    "id": 50,
+    "name": "Golden Honeycomb",
+    "blurb": "A sweet honey candle.",
+    "description": "Indulge in the warm, golden aroma of honey with our Golden Honeycomb candle. Made with soy wax and a lead-free wick, this candle burns for up to 50 hours, creating a cozy and inviting atmosphere.",
+    "image": "/img/golden_honeycomb.jpg",
+    "price": "$15.49",
+    "tags": ["sweet", "cozy", "EVERYTHING"]
+  },
+  {
+    "id": 51,
+    "name": "Tropical Hibiscus",
+    "blurb": "A vibrant hibiscus candle.",
+    "description": "Our Tropical Hibiscus candle captures the essence of a tropical vacation with the sweet and tangy scent of hibiscus flowers. Burns cleanly for up to 40 hours.",
+    "image": "/img/tropical_hibiscus.jpg",
+    "price": "$13.99",
+    "tags": ["floral", "fruity", "EVERYTHING"]
+  },
+  {
+    "id": 52,
+    "name": "Lavender & Sage Calm",
+    "blurb": "A calming lavender and sage candle.",
+    "description": "Create a tranquil space with our Lavender & Sage Calm candle. Featuring the soothing scents of lavender and earthy sage, this candle burns for up to 50 hours.",
+    "image": "/img/lavender_sage.jpg",
+    "price": "$14.99",
+    "tags": ["floral", "woody", "EVERYTHING"]
+  },
+  {
+    "id": 53,
+    "name": "Spiced Pumpkin Latte",
+    "blurb": "A cozy pumpkin latte candle.",
+    "description": "Warm up with the inviting scent of Spiced Pumpkin Latte. Combining pumpkin, coffee, and spices, this candle is perfect for fall and burns for up to 45 hours.",
+    "image": "/img/spiced_pumpkin_latte.jpg",
+    "price": "$13.49",
+    "tags": ["spicy", "seasonal", "EVERYTHING"]
+  },
+  {
+    "id": 54,
+    "name": "Rainforest Retreat",
+    "blurb": "A lush rainforest candle.",
+    "description": "Transport yourself to a lush rainforest with our Rainforest Retreat candle. Featuring notes of green leaves, moss, and fresh rain, this candle burns for up to 50 hours.",
+    "image": "/img/rainforest_retreat.jpg",
+    "price": "$14.99",
+    "tags": ["fresh", "woody", "EVERYTHING"]
+  },
+  {
+    "id": 55,
+    "name": "Grapefruit Zest",
+    "blurb": "A zesty grapefruit candle.",
+    "description": "Brighten any room with the invigorating scent of Grapefruit Zest. This citrusy candle is perfect for adding a fresh and vibrant touch to your home. Burns for up to 40 hours.",
+    "image": "/img/grapefruit_zest.jpg",
+    "price": "$12.99",
+    "tags": ["fruity", "fresh", "EVERYTHING"]
+  },
+  {
+    "id": 56,
+    "name": "Cashmere Comfort",
+    "blurb": "A cozy cashmere candle.",
+    "description": "Wrap yourself in the soft, comforting scent of Cashmere Comfort. With notes of vanilla, amber, and musk, this candle creates a cozy ambiance and burns for up to 50 hours.",
+    "image": "/img/cashmere_comfort.jpg",
+    "price": "$14.99",
+    "tags": ["cozy", "woody", "EVERYTHING"]
+  },
+  {
+    "id": 57,
+    "name": "Mulled Wine Glow",
+    "blurb": "A festive mulled wine candle.",
+    "description": "Embrace the holiday season with the warm and spicy scent of Mulled Wine Glow. Featuring notes of red wine, orange zest, cinnamon, and cloves, this candle burns for up to 50 hours, creating a cozy and festive atmosphere.",
+    "image": "/img/mulled_wine.jpg",
+    "price": "$14.99",
+    "tags": ["spicy", "seasonal", "EVERYTHING"]
+  },
+  {
+    "id": 58,
+    "name": "Pear & Freesia Harmony",
+    "blurb": "A fresh pear and freesia candle.",
+    "description": "Our Pear & Freesia Harmony candle blends the crisp sweetness of ripe pears with the delicate floral notes of freesia. This uplifting candle burns cleanly for up to 45 hours.",
+    "image": "/img/pear_freesia.jpg",
+    "price": "$13.99",
+    "tags": ["fruity", "floral", "EVERYTHING"]
+  },
+  {
+    "id": 59,
+    "name": "Smoky Birchwood",
+    "blurb": "A rich birchwood candle.",
+    "description": "Bring the scent of a crackling fire indoors with our Smoky Birchwood candle. Featuring smoky birchwood, cedar, and amber, this candle is perfect for cozy nights and burns for up to 50 hours.",
+    "image": "/img/smoky_birchwood.jpg",
+    "price": "$15.49",
+    "tags": ["woody", "cozy", "EVERYTHING"]
+  },
+  {
+    "id": 60,
+    "name": "Lemon Verbena Glow",
+    "blurb": "A zesty lemon verbena candle.",
+    "description": "Refresh your space with the bright and uplifting scent of Lemon Verbena Glow. This clean, citrusy fragrance is ideal for energizing any room and burns for up to 40 hours.",
+    "image": "/img/lemon_verbena.jpg",
+    "price": "$12.49",
+    "tags": ["fresh", "fruity", "EVERYTHING"]
+  }
+]
