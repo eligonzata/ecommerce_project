@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
+    "mysql2": "^3.17.4",
     "next": "16.1.6",
     "react": "19.2.3",
     "react-awesome-reveal": "^4.3.1",
