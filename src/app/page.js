@@ -32,7 +32,7 @@ export default function Home() {
         {/* Main Content with Fade Animation */}
         <Fade triggerOnce={true}>
           <h1 className="text-4xl font-bold mb-4">Scent Sanctuary</h1>
-          <p className="text-lg max-w-lg text-center">
+          <p className="text-lg max-w-lg text-center mb-4">
             Transform Your Space, Elevate Your Senses
           </p>
 

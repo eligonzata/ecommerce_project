@@ -43,7 +43,7 @@ const Navbar = () => {
       className="relative top-0 sticky backdrop-blur-lg mx-auto z-50"
     >
       <div className="flex items-center justify-between mt-[-20px]">
-        <div className="sm:flex sm:items-center sm:space-x-4 relative sm:top-[-21px] sm:left-4">
+        <div className="sm:flex sm:items-center sm:space-x-4 relative sm:top-[-23px] sm:left-4">
           <Link href="/" aria-label="Go to homepage">
             <Image src="/img/logo.png" width={110} height={50} alt="Logo" />
           </Link>
@@ -58,9 +58,6 @@ const Navbar = () => {
             <Link href="/shop" className="hover:text-gray-300">
               Shop
             </Link>
-            <Link href="/contact" className="hover:text-gray-300">
-              Contact
-            </Link>
             <Link href="/aboutus" className="hover:text-gray-300">
               About us
             </Link>
@@ -69,6 +66,9 @@ const Navbar = () => {
               className="bg-gradient-to-r text-transparent bg-clip-text from-[#FF6F61] to-[#FFD700] hover:opacity-90"
             >
               Account
+            </Link>
+            <Link href="/admin" className="hover:text-gray-300">
+              Admin
             </Link>
           </div>
         </div>

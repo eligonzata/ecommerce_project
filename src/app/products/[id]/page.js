@@ -131,10 +131,13 @@ export default function ProductPage() {
                   {product.description}
                 </p>
 
-                {/* BACKEND TODO: price should come from backend*/}
-                <p className="text-lg font-semibold text-[#6f4f28] mt-4">
+                {/* BACKEND TODO: prices and item availability should come from backend*/}
+                <div className= "flex flex-row mt-4 space-x-4">
+                  <p className="text-lg font-semibold text-[#6f4f28]">
                   {product.price}
                 </p>
+                <p className="text-lg font-semibold text-[#6f4f28]"> Available: {product.id}</p>
+                </div>
 
                 <button
                   type="button"
@@ -146,11 +149,6 @@ export default function ProductPage() {
               </div>
             </div>
 
-            <div className="mt-10 text-center">
-              <h2 className="text-2xl font-semibold mb-4">Customer Reviews</h2>
-              {/* BACKEND TODO: load reviews from API */}
-              <p>No reviews yet. Coming Soon!</p>
-            </div>
           </>
         )}
       </div>

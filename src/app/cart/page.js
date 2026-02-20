@@ -36,7 +36,7 @@ function Cart() {
         return acc;
       }
 
-      return acc + price * qty;
+      return acc + price * qty * 1.0825;
     }, 0);
 
     return total;
@@ -166,7 +166,7 @@ function Cart() {
 
             <div className="cart-summary bg-white rounded-lg shadow-lg p-6 mt-6">
               <div className="flex justify-between mb-4">
-                <span className="text-xl font-semibold text-gray-800">Total Price:</span>
+                <span className="text-xl font-semibold text-gray-800">Total Price (including 8.25% tax):</span>
                 <span className="text-xl font-semibold text-gray-900">
                   ${totalPrice.toFixed(2)}
                 </span>

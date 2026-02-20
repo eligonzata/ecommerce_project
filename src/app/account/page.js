@@ -38,7 +38,7 @@ export default function Account() {
           <img
             src="/img/login.jpg"
             alt="Candles on a wooden surface"
-            className="absolute inset-0 w-[120%] h-full object-cover -left-[10%]"
+            className="absolute inset-0 w-[120%] h-full object-cover -left-[.5%]"
           />
         </div>
 
