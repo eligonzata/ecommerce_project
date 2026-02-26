@@ -39,3 +39,17 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# backend
+# Python
+ecommerce_backend/venv/
+__pycache__/
+*.pyc
+
+
+# MySQL dumps (if any)
+*.sql
+
+# Flask instance folder (if created)
+instance/
+
