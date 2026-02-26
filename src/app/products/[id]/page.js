@@ -14,47 +14,19 @@ export default function ProductPage() {
   const [status, setStatus] = useState("loading"); // loading | ready | not_found | error
 
   useEffect(() => {
-    let isMounted = true;
-
-    // TEMP DATA SOURCE
-    // BACKEND TODO: replace candles.json fetch with an API call:
-    fetch("/candles.json")
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`Failed to load candles.json (HTTP ${response.status})`);
-        }
-        return response.json();
-      })
-      .then((data) => {
-        if (!isMounted) return;
-
-        const safeData = Array.isArray(data) ? data : [];
-        const idNum = Number(params?.id);
-
-        const selectedProduct = safeData.find(
-          (item) => Number(item?.id) === idNum
-        );
-
-        if (!selectedProduct) {
-          setProduct(null);
-          setStatus("not_found");
-          return;
-        }
-
-        setProduct(selectedProduct);
-        setStatus("ready");
-      })
-      .catch((error) => {
-        if (!isMounted) return;
-        console.error("Error loading product data:", error);
-        setProduct(null);
-        setStatus("error");
-      });
-
-    return () => {
-      isMounted = false;
-    };
-  }, [params?.id]);
+  fetch(`http://localhost:5000/products/${params.id}`)
+    .then((res) => {
+      if (!res.ok) throw new Error("Not found");
+      return res.json();
+    })
+    .then((data) => {
+      setProduct(data);
+      setStatus("ready");
+    })
+    .catch(() => {
+      setStatus("not_found");
+    });
+}, [params?.id]);
 
   function cartBtnHandler() {
     // BACKEND TODO: Cart should be managed server-side
@@ -131,12 +103,12 @@ export default function ProductPage() {
                   {product.description}
                 </p>
 
-                {/* BACKEND TODO: prices and item availability should come from backend*/}
+                {/* DONE: prices and item availability should come from backend*/}
                 <div className= "flex flex-row mt-4 space-x-4">
                   <p className="text-lg font-semibold text-[#6f4f28]">
                   {product.price}
                 </p>
-                <p className="text-lg font-semibold text-[#6f4f28]"> Available: {product.id}</p>
+                <p className="text-lg font-semibold text-[#6f4f28]"> Available: {product.stock_quantity}</p>
                 </div>
 
                 <button
