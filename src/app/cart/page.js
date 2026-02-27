@@ -5,15 +5,17 @@ import Image from "next/image";
 import Navbar from "@/app/components/Navbar";
 import Footer from "@/app/components/Footer";
 import Link from "next/link";
+import { FaArrowRight } from "react-icons/fa";
 
 function Cart() {
-  // BACKEND TODO: Cart should come from server
+  // BACKEND TODO: Cart and Discount should come from server
   const [cartItems, setCartItems] = useState([]);
   const [checkoutMessage, setCheckoutMessage] = useState("");
+  const [discount, setDiscount] = useState("");
 
   useEffect(() => {
     // TEMP: Retrieve cart items from localStorage
-    // BACKEND TODO: replace with API call 
+    // BACKEND TODO: replace with API call
     try {
       const raw = localStorage.getItem("cartItems");
       const parsed = raw ? JSON.parse(raw) : [];
@@ -55,7 +57,9 @@ function Cart() {
   };
 
   const removeFromCart = (itemId) => {
-    const updatedCartItems = cartItems.filter((item) => Number(item?.id) !== Number(itemId));
+    const updatedCartItems = cartItems.filter(
+      (item) => Number(item?.id) !== Number(itemId),
+    );
     persistCart(updatedCartItems);
   };
 
@@ -85,6 +89,13 @@ function Cart() {
     }
   };
 
+  function discountBtnHandler() {
+    // BACKEND TODO: submit discount
+    // TEMP: no-op
+    console.log("Discount Set:", discount);
+    setDiscount("");
+  }
+
   const isEmpty = cartItems.length === 0;
 
   return (
@@ -92,7 +103,9 @@ function Cart() {
       <Navbar />
 
       <div className="container mx-auto px-4 mb-32">
-        <h1 className="text-4xl font-bold text-center text-black mb-6">Your Cart</h1>
+        <h1 className="text-4xl font-bold text-center text-black mb-6">
+          Your Cart
+        </h1>
 
         {isEmpty ? (
           <div className="text-center">
@@ -132,9 +145,13 @@ function Cart() {
                     </div>
 
                     <div>
-                      <h3 className="text-lg font-semibold text-gray-800">{item.name}</h3>
+                      <h3 className="text-lg font-semibold text-gray-800">
+                        {item.name}
+                      </h3>
                       {/* BACKEND TODO: price should come from backend */}
-                      <span className="text-sm text-gray-500">Price: {item.price}</span>
+                      <span className="text-sm text-gray-500">
+                        Price: {item.price}
+                      </span>
                     </div>
                   </div>
 
@@ -165,8 +182,31 @@ function Cart() {
             </div>
 
             <div className="cart-summary bg-white rounded-lg shadow-lg p-6 mt-6">
+              <p className="text-gray-800 max-w-sm font-semibold">Add Discount Code:</p>
+
+              <div className="relative w-full max-w-sm m-0 p-0.5 mb-6 rounded-lg bg-gradient-to-r from-[#ffb03b] to-[#ff1f1b]">
+                <input
+                  className="p-3 pr-12 w-full rounded-lg focus:outline-none text-black"
+                  type="discount"
+                  value={discount}
+                  onChange={(e) => setDiscount(e.target.value)}
+                  placeholder=""
+                  aria-label="Discount"
+                />
+                <button
+                  type="button"
+                  className="absolute right-1 top-2 px-3 py-3"
+                  onClick={discountBtnHandler}
+                  aria-label="Submit email"
+                >
+                  <FaArrowRight fill="black" />
+                </button>
+              </div>
+
               <div className="flex justify-between mb-4">
-                <span className="text-xl font-semibold text-gray-800">Total Price (including 8.25% tax):</span>
+                <span className="text-xl font-semibold text-gray-800">
+                  Total Price (including 8.25% tax):
+                </span>
                 <span className="text-xl font-semibold text-gray-900">
                   ${totalPrice.toFixed(2)}
                 </span>
