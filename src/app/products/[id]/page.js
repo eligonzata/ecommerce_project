@@ -21,7 +21,9 @@ export default function ProductPage() {
     fetch("/candles.json")
       .then((response) => {
         if (!response.ok) {
-          throw new Error(`Failed to load candles.json (HTTP ${response.status})`);
+          throw new Error(
+            `Failed to load candles.json (HTTP ${response.status})`,
+          );
         }
         return response.json();
       })
@@ -32,7 +34,7 @@ export default function ProductPage() {
         const idNum = Number(params?.id);
 
         const selectedProduct = safeData.find(
-          (item) => Number(item?.id) === idNum
+          (item) => Number(item?.id) === idNum,
         );
 
         if (!selectedProduct) {
@@ -67,7 +69,7 @@ export default function ProductPage() {
       const safeCart = Array.isArray(existingCart) ? existingCart : [];
 
       const existingProductIndex = safeCart.findIndex(
-        (item) => Number(item?.id) === Number(product?.id)
+        (item) => Number(item?.id) === Number(product?.id),
       );
 
       if (existingProductIndex > -1) {
@@ -96,7 +98,9 @@ export default function ProductPage() {
 
         {status === "error" && (
           <div className="text-center">
-            <p className="text-red-600 font-semibold">Could not load product.</p>
+            <p className="text-red-600 font-semibold">
+              Could not load product.
+            </p>
           </div>
         )}
 
@@ -127,16 +131,17 @@ export default function ProductPage() {
               <div className="flex flex-col items-center text-center max-w-xl">
                 <h1 className="text-3xl font-bold mt-4">{product.name}</h1>
 
-                <p className="text-gray-600 mt-2">
-                  {product.description}
-                </p>
+                <p className="text-gray-600 mt-2">{product.description}</p>
 
                 {/* BACKEND TODO: prices and item availability should come from backend*/}
-                <div className= "flex flex-row mt-4 space-x-4">
+                <div className="flex flex-row mt-4 space-x-4">
                   <p className="text-lg font-semibold text-[#6f4f28]">
-                  {product.price}
-                </p>
-                <p className="text-lg font-semibold text-[#6f4f28]"> Available: {product.id}</p>
+                    {product.price}
+                  </p>
+                  <p className="text-lg font-semibold text-[#6f4f28]">
+                    {" "}
+                    Available: {product.id}
+                  </p>
                 </div>
 
                 <button
@@ -148,7 +153,6 @@ export default function ProductPage() {
                 </button>
               </div>
             </div>
-
           </>
         )}
       </div>

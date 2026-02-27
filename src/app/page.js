@@ -3,6 +3,7 @@
 import { useContext } from "react";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
+import Button from "./components/Button";
 import ProductList from "./components/ProductList";
 import ThemeContext from "@/context/ThemeContext";
 import Link from "next/link";
@@ -37,12 +38,7 @@ export default function Home() {
           </p>
 
           <Link href="/shop" className="mt-8">
-            <button
-              type="button"
-              className="px-6 py-3 bg-gradient-to-r from-[#ffb03b] to-[#ff1f1b] text-white font-bold rounded"
-            >
-              Visit the Shop
-            </button>
+            <Button text="Visit the Shop" />
           </Link>
         </Fade>
       </div>
