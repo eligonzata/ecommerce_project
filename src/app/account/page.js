@@ -6,25 +6,53 @@ import Footer from "../components/Footer";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
+
 export default function Account() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setSuccessMessage("");
+    setLoading(true);
 
-    // BACKEND TODO: replace with real auth endpoint (POST /api/auth/login)
-    if (email && password) {
-      setSuccessMessage("Login successful (placeholder)");
-      localStorage.setItem("user", JSON.stringify({ email }));
-      setTimeout(() => router.push("/"), 800);
-    } else {
-      setError("Invalid email or password");
+    try {
+      const response = await fetch(`${API_URL}/users?email=${encodeURIComponent(email)}`);
+      
+      if (!response.ok) {
+        throw new Error("Invalid email or password");
+      }
+
+      const users = await response.json();
+      const user = Array.isArray(users) ? users.find(u => u.email === email) : null;
+      
+      if (!user) {
+        throw new Error("Invalid email or password");
+      }
+
+      if (user.password === password) {
+        setSuccessMessage("Login successful!");
+        localStorage.setItem("user", JSON.stringify({ 
+          id: user.user_id, 
+          email: user.email,
+          name: `${user.first_name} ${user.last_name}`,
+          role: user.user_role
+        }));
+        
+        setTimeout(() => router.push("/"), 1000);
+      } else {
+        throw new Error("Invalid email or password");
+      }
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -33,7 +61,6 @@ export default function Account() {
       <Navbar />
 
       <div className="relative flex min-h-screen bg-[#deddca] overflow-hidden">
-        {/* Left image (hidden on mobile) */}
         <div className="hidden md:block relative w-1/2 h-screen">
           <img
             src="/img/login.jpg"
@@ -42,7 +69,6 @@ export default function Account() {
           />
         </div>
 
-        {/* Logo */}
         <div className="absolute top-5 right-[26%] md:right-[26%] z-10 md:block">
           <img
             src="/img/logo.png"
@@ -51,7 +77,6 @@ export default function Account() {
           />
         </div>
 
-        {/* Right login panel */}
         <div className="flex w-full md:w-1/2 bg-white justify-center items-center px-6">
           <div className="w-full max-w-md text-center">
             <h1 className="text-2xl font-semibold mb-6">
@@ -92,13 +117,15 @@ export default function Account() {
 
               <button
                 type="submit"
-                className="w-full bg-[#641414] text-white py-2 rounded hover:bg-[#555] transition"
+                disabled={loading}
+                className={`w-full bg-[#641414] text-white py-2 rounded hover:bg-[#555] transition ${
+                  loading ? "opacity-50 cursor-not-allowed" : ""
+                }`}
               >
-                Login
+                {loading ? "Logging in..." : "Login"}
               </button>
 
               <div className="flex flex-col items-center mt-4 space-y-2">
-                {/* BACKEND/ROUTING TODO */}
                 <Link
                   href="/forgot-password"
                   className="text-blue-600 hover:underline"
