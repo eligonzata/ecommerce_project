@@ -5,9 +5,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { ShoppingCartIcon } from "@heroicons/react/24/solid";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
+
 const Navbar = () => {
-  // BACKEND TODO: cart item count should come from server
-  const [cartItems, setCartItems] = useState([]);
+  const [cartCount, setCartCount] = useState(0);
+  const [userId, setUserId] = useState(null);
 
   const navbarBackgroundColor = "#641414";
   const textColor = "#FFFFFF";
@@ -27,15 +29,32 @@ const Navbar = () => {
   };
 
   useEffect(() => {
-    // BACKEND TODO: replace this with API call 
-    try {
-      const raw = localStorage.getItem("cartItems");
-      const parsed = raw ? JSON.parse(raw) : [];
-      setCartItems(Array.isArray(parsed) ? parsed : []);
-    } catch (err) {
-      setCartItems([]);
+    const user = JSON.parse(localStorage.getItem("user") || "null");
+    if (user?.id) {
+      setUserId(user.id);
     }
   }, []);
+
+  useEffect(() => {
+    if (!userId) return;
+
+    const fetchCartCount = async () => {
+      try {
+        const response = await fetch(`${API_URL}/cart/${userId}`);
+        if (response.ok) {
+          const items = await response.json();
+          setCartCount(items.reduce((sum, item) => sum + item.quantity, 0));
+        }
+      } catch (err) {
+        console.error("Failed to fetch cart:", err);
+      }
+    };
+
+    fetchCartCount();
+
+    const interval = setInterval(fetchCartCount, 5000);
+    return () => clearInterval(interval);
+  }, [userId]);
 
   return (
     <nav
@@ -49,7 +68,6 @@ const Navbar = () => {
           </Link>
         </div>
 
-        {/* Center Menu Items */}
         <div className="flex-1 flex justify-center">
           <div className="hidden md:flex lg:space-x-12 md:space-x-6 font-bold">
             <Link href="/" className="hover:text-gray-300">
@@ -73,15 +91,16 @@ const Navbar = () => {
           </div>
         </div>
 
-        {/* Cart Icon with Item Count */}
         <div className="relative flex items-center space-x-4">
           <Link href="/cart" aria-label="View cart">
             <ShoppingCartIcon className="w-8 h-8 text-white cursor-pointer hover:text-blue-400 transition-colors" />
           </Link>
 
-          <span className="absolute top-0 right-0 text-xs bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center">
-            {cartItems.length}
-          </span>
+          {cartCount > 0 && (
+            <span className="absolute top-0 right-0 text-xs bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center">
+              {cartCount}
+            </span>
+          )}
         </div>
 
         <div className="absolute bottom-0 left-0 w-full h-[2px] bg-white"></div>

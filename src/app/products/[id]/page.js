@@ -3,57 +3,71 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
-import Navbar from "@/app/components/Navbar";
-import Footer from "@/app/components/Footer";
+import Navbar from "../../components/Navbar";
+import Footer from "../../components/Footer";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
 
 export default function ProductPage() {
   const params = useParams();
   const router = useRouter();
 
   const [product, setProduct] = useState(null);
-  const [status, setStatus] = useState("loading"); // loading | ready | not_found | error
+  const [status, setStatus] = useState("loading");
+  const [userId, setUserId] = useState(null);
+  const [addingToCart, setAddingToCart] = useState(false);
 
   useEffect(() => {
-  fetch(`http://localhost:5000/products/${params.id}`)
-    .then((res) => {
-      if (!res.ok) throw new Error("Not found");
-      return res.json();
-    })
-    .then((data) => {
-      setProduct(data);
-      setStatus("ready");
-    })
-    .catch(() => {
-      setStatus("not_found");
-    });
-}, [params?.id]);
+    const user = JSON.parse(localStorage.getItem("user") || "null");
+    if (user?.id) {
+      setUserId(user.id);
+    }
+  }, []);
 
-  function cartBtnHandler() {
-    // BACKEND TODO: Cart should be managed server-side
-    // This is temporary UI-only behavior.
+  useEffect(() => {
+    if (!params?.id) return;
 
+    fetch(`${API_URL}/products/${params.id}`)
+      .then((res) => {
+        if (!res.ok) throw new Error("Product not found");
+        return res.json();
+      })
+      .then((data) => {
+        setProduct(data);
+        setStatus("ready");
+      })
+      .catch((err) => {
+        console.error(err);
+        setStatus("error");
+      });
+  }, [params?.id]);
+
+  async function addToCart() {
+    if (!userId) {
+      router.push("/account");
+      return;
+    }
+
+    setAddingToCart(true);
     try {
-      const existingCartRaw = localStorage.getItem("cartItems");
-      const existingCart = existingCartRaw ? JSON.parse(existingCartRaw) : [];
+      const response = await fetch(`${API_URL}/cart`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user_id: userId,
+          product_id: product.id,
+          quantity: 1
+        })
+      });
 
-      const safeCart = Array.isArray(existingCart) ? existingCart : [];
+      if (!response.ok) throw new Error("Failed to add to cart");
 
-      const existingProductIndex = safeCart.findIndex(
-        (item) => Number(item?.id) === Number(product?.id)
-      );
-
-      if (existingProductIndex > -1) {
-        safeCart[existingProductIndex].quantity =
-          (safeCart[existingProductIndex].quantity || 1) + 1;
-      } else {
-        safeCart.push({ ...product, quantity: 1 });
-      }
-
-      localStorage.setItem("cartItems", JSON.stringify(safeCart));
       router.push("/cart");
     } catch (err) {
       console.error("Cart error:", err);
-      // Keep user on page if storage fails
+      alert("Failed to add item to cart. Please try again.");
+    } finally {
+      setAddingToCart(false);
     }
   }
 
@@ -61,67 +75,82 @@ export default function ProductPage() {
     <div>
       <Navbar />
 
-      <div className="container mx-auto py-10">
+      <div className="container mx-auto py-10 min-h-screen">
         {status === "loading" && (
           <p className="text-center text-gray-600">Loading...</p>
         )}
 
         {status === "error" && (
           <div className="text-center">
-            <p className="text-red-600 font-semibold">Could not load product.</p>
-          </div>
-        )}
-
-        {status === "not_found" && (
-          <div className="text-center">
-            <p className="text-gray-700 font-semibold">Product not found.</p>
-            <button
-              type="button"
-              onClick={() => router.push("/shop")}
-              className="mt-4 px-6 py-2 outline rounded-xl"
-            >
-              Back to Shop
-            </button>
+            <p className="text-red-600 font-semibold">
+              Could not load product.
+            </p>
           </div>
         )}
 
         {status === "ready" && product && (
-          <>
-            <div className="flex flex-col lg:flex-row items-center gap-10 p-6 lg:p-24">
+          <div className="flex flex-col lg:flex-row items-center gap-10 p-6 lg:p-24">
+            <div className="relative w-full lg:w-1/2 h-96">
               <Image
-                src={product.image}
+                src={product.image || "/img/placeholder.png"}
                 alt={product.name}
-                width={500}
-                height={500}
-                className="rounded-md"
+                fill
+                className="object-cover rounded-md"
               />
-
-              <div className="flex flex-col items-center text-center max-w-xl">
-                <h1 className="text-3xl font-bold mt-4">{product.name}</h1>
-
-                <p className="text-gray-600 mt-2">
-                  {product.description}
-                </p>
-
-                {/* DONE: prices and item availability should come from backend*/}
-                <div className= "flex flex-row mt-4 space-x-4">
-                  <p className="text-lg font-semibold text-[#6f4f28]">
-                  {product.price}
-                </p>
-                <p className="text-lg font-semibold text-[#6f4f28]"> Available: {product.stock_quantity}</p>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={cartBtnHandler}
-                  className="mt-8 px-6 py-3 outline rounded-xl"
-                >
-                  Add to Cart
-                </button>
-              </div>
             </div>
 
-          </>
+            <div className="flex flex-col items-center text-center max-w-xl">
+              <h1 className="text-3xl font-bold mt-4">
+                {product.name}
+              </h1>
+
+              <p className="text-gray-600 mt-2">
+                {product.description}
+              </p>
+
+              <div className="flex flex-col mt-4 space-y-2">
+                {product.is_on_sale ? (
+                  <div>
+                    <p className="text-lg text-gray-400 line-through">
+                      ${Number(product.price).toFixed(2)}
+                    </p>
+                    <p className="text-2xl font-semibold text-[#6f4f28]">
+                      ${Number(product.sale_price).toFixed(2)}
+                    </p>
+                  </div>
+                ) : (
+                  <p className="text-2xl font-semibold text-[#6f4f28]">
+                    ${Number(product.price).toFixed(2)}
+                  </p>
+                )}
+
+                <p className="text-lg">
+                  Available: {product.stock_quantity}
+                </p>
+
+                <p className="text-sm text-gray-500">
+                  Wick Type: {product.wick_type}
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={addToCart}
+                disabled={addingToCart || product.stock_quantity === 0}
+                className={`mt-8 px-6 py-3 rounded-xl ${
+                  product.stock_quantity > 0
+                    ? "bg-[#641414] text-white hover:bg-[#8a2a2a]"
+                    : "bg-gray-400 text-gray-200 cursor-not-allowed"
+                }`}
+              >
+                {addingToCart 
+                  ? "Adding..." 
+                  : product.stock_quantity > 0 
+                    ? "Add to Cart" 
+                    : "Out of Stock"}
+              </button>
+            </div>
+          </div>
         )}
       </div>
 
