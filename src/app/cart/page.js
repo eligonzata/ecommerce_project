@@ -165,13 +165,6 @@ function Cart() {
     }
   };
 
-  function discountBtnHandler() {
-    // BACKEND TODO: submit discount
-    // TEMP: no-op
-    console.log("Discount Set:", discount);
-    setDiscount("");
-  }
-
   const isEmpty = cartItems.length === 0;
 
   return (

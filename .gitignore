@@ -42,6 +42,7 @@ next-env.d.ts
 
 # backend
 # Python
+ecommerce_backend/venv/
 __pycache__/
 *.pyc
 
@@ -52,7 +53,3 @@ __pycache__/
 # Flask instance folder (if created)
 instance/
 
-
-
-#virtual env
-venv/
