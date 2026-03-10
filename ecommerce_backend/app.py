@@ -15,7 +15,7 @@ CORS(app, origins=["http://localhost:3000", "http://127.0.0.1:3000", "http://loc
 db_config = {
     "host": "localhost",
     "user": "root",
-    "password": "ADD_PASSWORD_HERE",
+    "password": "REPLACE WITH YOUR PASSWORD",
     "database": "Flame_Keepers",
 }
 
@@ -169,16 +169,43 @@ def get_products_by_tag():
         JOIN product_tags AS pt ON p.product_id = pt.product_id
         JOIN tags AS t ON pt.tag_id = t.tag_id
         WHERE t.tag_name = %s
-        LIMIT %s
     """
 
-    cursor.execute(query, (tag, limit))
+    params = [tag]
+
+    if limit:
+        query += " LIMIT %s"
+        params.append(limit)
+
+    cursor.execute(query, params)
     products = cursor.fetchall()
 
     cursor.close()
     conn.close()
 
     return jsonify(products)
+
+#this one is used for the tag filtering on the products page
+@app.route("/tags", methods=["GET"])
+def get_tags():
+    conn = get_db()
+    if not conn:
+        return jsonify({"error": "Database connection failed"}), 500
+
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute("""
+        SELECT tag_id, tag_name
+        FROM tags
+        ORDER BY tag_name
+    """)
+
+    tags = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    return jsonify(tags)
 
 # USERS
 
