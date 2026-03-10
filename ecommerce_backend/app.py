@@ -15,7 +15,7 @@ CORS(app, origins=["http://localhost:3000", "http://127.0.0.1:3000", "http://loc
 db_config = {
     "host": "localhost",
     "user": "root",
-    "password": "Eto@68627",
+    "password": "ADD_PASSWORD_HERE",
     "database": "Flame_Keepers",
 }
 
@@ -148,6 +148,37 @@ def get_product(product_id):
     else:
         return jsonify({"error": "Product not found"}), 404
 
+#this is for the home page tagged products section
+@app.route("/products/tagged", methods=["GET"])
+def get_products_by_tag():
+    tag = request.args.get("tag")
+    limit = request.args.get("limit", type=int)
+
+    if not tag:
+        return jsonify({"error": "tag parameter is required"}), 400
+
+    conn = get_db()
+    if not conn:
+        return jsonify({"error": "Database connection failed"}), 500
+
+    cursor = conn.cursor(dictionary=True)
+
+    query = """
+        SELECT p.*
+        FROM v_product_catalog AS p
+        JOIN product_tags AS pt ON p.product_id = pt.product_id
+        JOIN tags AS t ON pt.tag_id = t.tag_id
+        WHERE t.tag_name = %s
+        LIMIT %s
+    """
+
+    cursor.execute(query, (tag, limit))
+    products = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    return jsonify(products)
 
 # USERS
 
