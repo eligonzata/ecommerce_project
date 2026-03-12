@@ -5,7 +5,6 @@ import Image from "next/image";
 import Navbar from "@/app/components/Navbar";
 import Footer from "@/app/components/Footer";
 import Link from "next/link";
-import { FaArrowRight } from "react-icons/fa";
 
 function Cart() {
   // BACKEND TODO: Cart and Discount should come from server
@@ -182,25 +181,28 @@ function Cart() {
             </div>
 
             <div className="cart-summary bg-white rounded-lg shadow-lg p-6 mt-6">
-              <p className="text-gray-800 max-w-sm font-semibold">Add Discount Code:</p>
+              <p className="text-gray-800 max-w-sm font-semibold mb-2">Add Discount Code:</p>
 
-              <div className="relative w-full max-w-sm m-0 p-0.5 mb-6 rounded-lg bg-gradient-to-r from-[#ffb03b] to-[#ff1f1b]">
-                <input
-                  className="p-3 pr-12 w-full rounded-lg focus:outline-none text-black"
-                  type="discount"
-                  value={discount}
-                  onChange={(e) => setDiscount(e.target.value)}
-                  placeholder=""
-                  aria-label="Discount"
-                />
-                <button
-                  type="button"
-                  className="absolute right-1 top-2 px-3 py-3"
-                  onClick={discountBtnHandler}
-                  aria-label="Submit email"
-                >
-                  <FaArrowRight fill="black" />
-                </button>
+              <div className="w-full max-w-md mb-6 rounded-xl bg-gradient-to-r from-[#ffb03b] to-[#ff1f1b] p-[2px]">
+                <div className="flex items-center rounded-[10px] ">
+                  <input
+                    className="flex-1 rounded-l-[10px] px-4 py-3 text-black focus:outline-none"
+                    type="text"
+                    value={discount}
+                    onChange={(e) => setDiscount(e.target.value.toUpperCase())}
+                    placeholder="Enter discount code"
+                    aria-label="Discount code"
+                  />
+
+                  <button
+                    type="button"
+                    onClick={discountBtnHandler}
+                    className="rounded-r-[10px] px-4 py-3 font-semibold text-black hover:bg-gray-100 transition"
+                    aria-label="Apply discount code"
+                  >
+                    Apply
+                  </button>
+                </div>
               </div>
 
               <div className="flex justify-between mb-4">
