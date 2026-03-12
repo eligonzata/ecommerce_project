@@ -43,7 +43,7 @@ export default function Account() {
         </div>
 
         {/* Logo */}
-        <div className="absolute top-5 right-[26%] md:right-[26%] z-10 md:block">
+        <div className="absolute top-5 right-[26%] md:right-[22%] z-10 md:block">
           <img
             src="/img/logo.png"
             alt="Scent Sanctuary Logo"
