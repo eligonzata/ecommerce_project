@@ -136,7 +136,7 @@ export default function ProductPage() {
                   <p className="text-lg font-semibold text-[#6f4f28]">
                   {product.price}
                 </p>
-                <p className="text-lg font-semibold text-[#6f4f28]"> Available: {product.id}</p>
+                <p className="text-lg font-semibold text-[#6f4f28]"> Stock: {product.stock}</p>
                 </div>
 
                 <button
