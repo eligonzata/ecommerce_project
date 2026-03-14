@@ -140,7 +140,7 @@ export default function ProductPage() {
                   </p>
                   <p className="text-lg font-semibold text-[#6f4f28]">
                     {" "}
-                    Available: {product.id}
+                    Stock: {product.stock}
                   </p>
                 </div>
 

@@ -60,29 +60,7 @@ const Footer = () => {
             />
           </div>
 
-          <p className="text-gray-600 max-w-sm">
-            Sign up to get the latest in news, discounts, opportunities, and
-            more.
-          </p>
-
-          <div className="relative w-full max-w-sm m-0 p-0.5 rounded-lg bg-gradient-to-r from-[#ffb03b] to-[#ff1f1b]">
-            <input
-              className="p-3 pr-12 w-full rounded-lg focus:outline-none text-black"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Email Address"
-              aria-label="Email Address"
-            />
-            <button
-              type="button"
-              className="absolute right-1 top-2 px-3 py-3"
-              onClick={emailBtnHandler}
-              aria-label="Submit email"
-            >
-              <FaArrowRight fill="gray" />
-            </button>
-          </div>
+          
 
           {/* TODO: maybe add company name */}
           <p className="text-gray-600">&copy; 2026 LLC, all rights reserved.</p>

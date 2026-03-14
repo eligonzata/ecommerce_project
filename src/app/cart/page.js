@@ -7,13 +7,14 @@ import Footer from "@/app/components/Footer";
 import Link from "next/link";
 
 function Cart() {
-  // BACKEND TODO: Cart should come from server
+  // BACKEND TODO: Cart and Discount should come from server
   const [cartItems, setCartItems] = useState([]);
   const [checkoutMessage, setCheckoutMessage] = useState("");
+  const [discount, setDiscount] = useState("");
 
   useEffect(() => {
     // TEMP: Retrieve cart items from localStorage
-    // BACKEND TODO: replace with API call 
+    // BACKEND TODO: replace with API call
     try {
       const raw = localStorage.getItem("cartItems");
       const parsed = raw ? JSON.parse(raw) : [];
@@ -55,7 +56,9 @@ function Cart() {
   };
 
   const removeFromCart = (itemId) => {
-    const updatedCartItems = cartItems.filter((item) => Number(item?.id) !== Number(itemId));
+    const updatedCartItems = cartItems.filter(
+      (item) => Number(item?.id) !== Number(itemId),
+    );
     persistCart(updatedCartItems);
   };
 
@@ -85,6 +88,13 @@ function Cart() {
     }
   };
 
+  function discountBtnHandler() {
+    // BACKEND TODO: submit discount
+    // TEMP: no-op
+    console.log("Discount Set:", discount);
+    setDiscount("");
+  }
+
   const isEmpty = cartItems.length === 0;
 
   return (
@@ -92,7 +102,9 @@ function Cart() {
       <Navbar />
 
       <div className="container mx-auto px-4 mb-32">
-        <h1 className="text-4xl font-bold text-center text-black mb-6">Your Cart</h1>
+        <h1 className="text-4xl font-bold text-center text-black mb-6">
+          Your Cart
+        </h1>
 
         {isEmpty ? (
           <div className="text-center">
@@ -132,9 +144,13 @@ function Cart() {
                     </div>
 
                     <div>
-                      <h3 className="text-lg font-semibold text-gray-800">{item.name}</h3>
+                      <h3 className="text-lg font-semibold text-gray-800">
+                        {item.name}
+                      </h3>
                       {/* BACKEND TODO: price should come from backend */}
-                      <span className="text-sm text-gray-500">Price: {item.price}</span>
+                      <span className="text-sm text-gray-500">
+                        Price: {item.price}
+                      </span>
                     </div>
                   </div>
 
@@ -165,8 +181,34 @@ function Cart() {
             </div>
 
             <div className="cart-summary bg-white rounded-lg shadow-lg p-6 mt-6">
+              <p className="text-gray-800 max-w-sm font-semibold mb-2">Add Discount Code:</p>
+
+              <div className="w-full max-w-md mb-6 rounded-xl bg-gradient-to-r from-[#ffb03b] to-[#ff1f1b] p-[2px]">
+                <div className="flex items-center rounded-[10px] ">
+                  <input
+                    className="flex-1 rounded-l-[10px] px-4 py-3 text-black focus:outline-none"
+                    type="text"
+                    value={discount}
+                    onChange={(e) => setDiscount(e.target.value.toUpperCase())}
+                    placeholder="Enter discount code"
+                    aria-label="Discount code"
+                  />
+
+                  <button
+                    type="button"
+                    onClick={discountBtnHandler}
+                    className="rounded-r-[10px] px-4 py-3 font-semibold text-black hover:bg-gray-100 transition"
+                    aria-label="Apply discount code"
+                  >
+                    Apply
+                  </button>
+                </div>
+              </div>
+
               <div className="flex justify-between mb-4">
-                <span className="text-xl font-semibold text-gray-800">Total Price (including 8.25% tax):</span>
+                <span className="text-xl font-semibold text-gray-800">
+                  Total Price (including 8.25% tax):
+                </span>
                 <span className="text-xl font-semibold text-gray-900">
                   ${totalPrice.toFixed(2)}
                 </span>
