@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext } from "react";
+//import { useContext } from "react";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import Button from "./components/Button";
@@ -8,11 +8,32 @@ import ProductList from "./components/ProductList";
 import ThemeContext from "@/context/ThemeContext";
 import Link from "next/link";
 import { Fade } from "react-awesome-reveal";
+import { useContext, useEffect, useState } from "react";
 
 export default function Home() {
+  const [popularProducts, setPopularProducts] = useState([]);
+  const [trendyProducts, setTrendyProducts] = useState([]);
   // Access theme context if needed for dynamic styling
   const { theme } = useContext(ThemeContext);
 
+  useEffect(() => {
+  async function fetchProducts() {
+    const popularRes = await fetch(
+      "http://localhost:5001/products/tagged?tag=popular&limit=3"
+    );
+    const trendyRes = await fetch(
+      "http://localhost:5001/products/tagged?tag=trendy&limit=6"
+    );
+
+    const popularData = await popularRes.json();
+    const trendyData = await trendyRes.json();
+
+    setPopularProducts(popularData);
+    setTrendyProducts(trendyData);
+  }
+
+  fetchProducts();
+}, []);
   return (
     <>
       {/* Navbar */}
@@ -50,7 +71,7 @@ export default function Home() {
         </h2>
 
         {/* BACKEND TODO: ProductList should fetch/filter products via API instead of hardcoded data */}
-        <ProductList tags={["popular"]} limit={3} />
+       <ProductList products={popularProducts} />
       </div>
 
       {/* Trending Products */}
@@ -60,7 +81,7 @@ export default function Home() {
         </h2>
 
         {/* BACKEND TODO: ProductList should fetch/filter products via API instead of hardcoded data */}
-        <ProductList tags={["trendy"]} limit={6} />
+        <ProductList products={trendyProducts} />
       </div>
 
       {/* Footer */}
