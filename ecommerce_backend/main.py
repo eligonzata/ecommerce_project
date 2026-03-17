@@ -1,15 +1,7 @@
-from flask import Flask, jsonify, request
+from flask import jsonify, request
 import mysql.connector
 
-from . import app, connection_pool, db_config
-
-
-def get_db():
-    try:
-        return connection_pool.get_connection()
-    except Exception as e:
-        print(f"Database connection error: {e}")
-        return None
+from . import app, get_db
 
 
 @app.route("/", methods=["GET"])

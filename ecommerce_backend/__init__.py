@@ -26,5 +26,14 @@ connection_pool = pooling.MySQLConnectionPool(
     pool_name="flame_pool", pool_size=5, **db_config
 )
 
-import ecommerce_backend.app
+
+def get_db():
+    try:
+        return connection_pool.get_connection()
+    except Exception as e:
+        print(f"Database connection error: {e}")
+        return None
+
+
+import ecommerce_backend.main
 import ecommerce_backend.admin

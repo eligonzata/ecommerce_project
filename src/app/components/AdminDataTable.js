@@ -13,7 +13,7 @@ export default function AdminDataTable({ data, columns }) {
 
   return (
     <div className="rounded-lg border w-full shadow-md overflow-auto max-h-[50vh]">
-      {typeof data === Array ? (
+      {Array.isArray(data) ? (
         <table className="w-full border-separate border-spacing-0">
           <thead className="bg-amber-100 sticky top-0">
             {table.getHeaderGroups().map((hg) => (
@@ -45,9 +45,9 @@ export default function AdminDataTable({ data, columns }) {
           </tbody>
         </table>
       ) : data === "LOADING" ? (
-        <div>Loading…</div>
+        <div className="p-4">Loading…</div>
       ) : (
-        <div className="text-red-500">
+        <div className="p-4 text-red-500">
           <strong>Error loading data.</strong>
         </div>
       )}

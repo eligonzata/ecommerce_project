@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "flask": "flask --app ecommerce_backend run",
+    "flask-dev": "flask --app ecommerce_backend.main --debug run -p 5001",
+    "flask": "flask --app ecommerce_backend.main run -p 5001",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
