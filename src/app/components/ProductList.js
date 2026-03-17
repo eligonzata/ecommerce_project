@@ -16,8 +16,8 @@ export default function ProductList({ products = [] }) {
     products.length === 1
       ? "grid-cols-1"
       : products.length === 2
-      ? "grid-cols-1 md:grid-cols-2"
-      : "grid-cols-1 md:grid-cols-3 2xl:grid-cols-6";
+        ? "grid-cols-1 md:grid-cols-2"
+        : "grid-cols-1 md:grid-cols-3 2xl:grid-cols-6";
 
   return (
     <div className={`grid gap-8 p-4 ${gridCols} justify-center`}>
@@ -49,22 +49,21 @@ export default function ProductList({ products = [] }) {
                 </span>
               </div>
             ) : (
-              <p className="text-[#6f4f28] font-semibold">
-                ${product.price}
-              </p>
+              <p className="text-[#6f4f28] font-semibold">${product.price}</p>
             )}
           </div>
           <p className="text-sm text-gray-500 mt-2">
             Wick: {product.wick_type}
           </p>
-          <p className={`text-sm mt-1 ${
-            product.stock_quantity > 0 ? "text-green-600" : "text-red-600"
-          }`}>
+          <p
+            className={`text-sm mt-1 ${
+              product.stock_quantity > 0 ? "text-green-600" : "text-red-600"
+            }`}
+          >
             {product.stock_quantity > 0 ? "In Stock" : "Out of Stock"}
           </p>
         </Link>
-        );
-})}
+      ))}
     </div>
   );
 }

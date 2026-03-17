@@ -1,29 +1,8 @@
 from flask import Flask, jsonify, request
-from flask_cors import CORS
 import mysql.connector
-from mysql.connector import pooling
-import os
 
-app = Flask(__name__)
+from . import app, connection_pool, db_config
 
-
-CORS(app, origins=["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:3001"], 
-     supports_credentials=True,
-     allow_headers=["Content-Type", "Authorization"])
-
-
-db_config = {
-    "host": "localhost",
-    "user": "root",
-    "password": "REPLACE WITH YOUR PASSWORD",
-    "database": "Flame_Keepers",
-}
-
-connection_pool = pooling.MySQLConnectionPool(
-    pool_name="flame_pool",
-    pool_size=5,
-    **db_config
-)
 
 def get_db():
     try:
@@ -37,9 +16,11 @@ def get_db():
 def home():
     return jsonify({"message": "Flame Keepers API is running!"})
 
+
 @app.route("/test", methods=["GET"])
 def test():
     return jsonify({"message": "API is working!"})
+
 
 @app.route("/health", methods=["GET"])
 def health_check():
@@ -69,17 +50,21 @@ def get_products():
     conn.close()
     return jsonify(products)
 
+
 @app.route("/products/sale", methods=["GET"])
 def get_sale_products():
     conn = get_db()
     if not conn:
         return jsonify({"error": "Database connection failed"}), 500
     cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM v_product_catalog WHERE is_on_sale = TRUE ORDER BY name")
+    cursor.execute(
+        "SELECT * FROM v_product_catalog WHERE is_on_sale = TRUE ORDER BY name"
+    )
     products = cursor.fetchall()
     cursor.close()
     conn.close()
     return jsonify(products)
+
 
 @app.route("/products/search", methods=["GET"])
 def search_products():
@@ -100,12 +85,13 @@ def search_products():
     conn.close()
     return jsonify(products)
 
+
 @app.route("/products/sort", methods=["GET"])
 def get_sorted_products():
     """Usage: GET /products/sort?by=price&order=ASC
-              GET /products/sort?by=availability"""
+    GET /products/sort?by=availability"""
     sort_by = request.args.get("by", "price")
-    order   = request.args.get("order", "ASC").upper()
+    order = request.args.get("order", "ASC").upper()
 
     if order not in ("ASC", "DESC"):
         return jsonify({"error": "order must be ASC or DESC"}), 400
@@ -127,6 +113,7 @@ def get_sorted_products():
     conn.close()
     return jsonify(products)
 
+
 @app.route("/products/<int:product_id>", methods=["GET"])
 def get_product(product_id):
     conn = get_db()
@@ -136,7 +123,7 @@ def get_product(product_id):
 
     cursor.execute(
         "SELECT product_id AS id, name, description, price, sale_price, is_on_sale, image_url AS image, stock_quantity, wick_type FROM products WHERE product_id = %s",
-        (product_id,)
+        (product_id,),
     )
 
     product = cursor.fetchone()
@@ -148,7 +135,8 @@ def get_product(product_id):
     else:
         return jsonify({"error": "Product not found"}), 404
 
-#this is for the home page tagged products section
+
+# this is for the home page tagged products section
 @app.route("/products/tagged", methods=["GET"])
 def get_products_by_tag():
     tag = request.args.get("tag")
@@ -185,7 +173,8 @@ def get_products_by_tag():
 
     return jsonify(products)
 
-#this one is used for the tag filtering on the products page
+
+# this one is used for the tag filtering on the products page
 @app.route("/tags", methods=["GET"])
 def get_tags():
     conn = get_db()
@@ -194,11 +183,13 @@ def get_tags():
 
     cursor = conn.cursor(dictionary=True)
 
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT tag_id, tag_name
         FROM tags
         ORDER BY tag_name
-    """)
+    """
+    )
 
     tags = cursor.fetchall()
 
@@ -206,6 +197,7 @@ def get_tags():
     conn.close()
 
     return jsonify(tags)
+
 
 # USERS
 
@@ -217,16 +209,19 @@ def get_users():
     if not conn:
         return jsonify({"error": "Database connection failed"}), 500
     cursor = conn.cursor(dictionary=True)
-    
+
     if email:
         cursor.execute("SELECT * FROM users WHERE email = %s", (email,))
     else:
-        cursor.execute("SELECT user_id, first_name, last_name, email, phone, user_role, created_at, is_active FROM users")
-    
+        cursor.execute(
+            "SELECT user_id, first_name, last_name, email, phone, user_role, created_at, is_active FROM users"
+        )
+
     users = cursor.fetchall()
     cursor.close()
     conn.close()
     return jsonify(users)
+
 
 @app.route("/users", methods=["POST"])
 def register_user():
@@ -244,8 +239,13 @@ def register_user():
         cursor.execute(
             """INSERT INTO users (first_name, last_name, email, password, phone)
                VALUES (%s, %s, %s, %s, %s)""",
-            (data["first_name"], data["last_name"], data["email"],
-             data["password"], data.get("phone"))
+            (
+                data["first_name"],
+                data["last_name"],
+                data["email"],
+                data["password"],
+                data.get("phone"),
+            ),
         )
         conn.commit()
         new_id = cursor.lastrowid
@@ -257,6 +257,7 @@ def register_user():
     conn.close()
     return jsonify({"message": "User registered successfully", "user_id": new_id}), 201
 
+
 @app.route("/users/<int:user_id>", methods=["GET"])
 def get_user(user_id):
     conn = get_db()
@@ -267,7 +268,7 @@ def get_user(user_id):
         """SELECT user_id, first_name, last_name, email, phone,
                   user_role, created_at, is_active
            FROM users WHERE user_id = %s""",
-        (user_id,)
+        (user_id,),
     )
     user = cursor.fetchone()
     cursor.close()
@@ -276,6 +277,7 @@ def get_user(user_id):
     if user:
         return jsonify(user)
     return jsonify({"error": "User not found"}), 404
+
 
 @app.route("/users/<int:user_id>", methods=["PUT"])
 def update_user(user_id):
@@ -320,6 +322,7 @@ def get_cart(user_id):
     conn.close()
     return jsonify(items)
 
+
 @app.route("/cart", methods=["POST"])
 def add_to_cart():
     """Body: { user_id, product_id, quantity }"""
@@ -332,11 +335,14 @@ def add_to_cart():
     if not conn:
         return jsonify({"error": "Database connection failed"}), 500
     cursor = conn.cursor()
-    cursor.callproc("sp_add_to_cart", [data["user_id"], data["product_id"], data["quantity"]])
+    cursor.callproc(
+        "sp_add_to_cart", [data["user_id"], data["product_id"], data["quantity"]]
+    )
     conn.commit()
     cursor.close()
     conn.close()
     return jsonify({"message": "Cart updated successfully"}), 201
+
 
 @app.route("/cart/<int:user_id>/<int:product_id>", methods=["PUT"])
 def update_cart_item(user_id, product_id):
@@ -352,7 +358,7 @@ def update_cart_item(user_id, product_id):
     cursor = conn.cursor()
     cursor.execute(
         "UPDATE cart SET quantity = %s WHERE user_id = %s AND product_id = %s",
-        (quantity, user_id, product_id)
+        (quantity, user_id, product_id),
     )
     conn.commit()
     affected = cursor.rowcount
@@ -363,6 +369,7 @@ def update_cart_item(user_id, product_id):
         return jsonify({"message": "Cart item updated"})
     return jsonify({"error": "Cart item not found"}), 404
 
+
 @app.route("/cart/<int:user_id>/<int:product_id>", methods=["DELETE"])
 def remove_from_cart(user_id, product_id):
     conn = get_db()
@@ -370,8 +377,7 @@ def remove_from_cart(user_id, product_id):
         return jsonify({"error": "Database connection failed"}), 500
     cursor = conn.cursor()
     cursor.execute(
-        "DELETE FROM cart WHERE user_id = %s AND product_id = %s",
-        (user_id, product_id)
+        "DELETE FROM cart WHERE user_id = %s AND product_id = %s", (user_id, product_id)
     )
     conn.commit()
     affected = cursor.rowcount
@@ -381,6 +387,7 @@ def remove_from_cart(user_id, product_id):
     if affected:
         return jsonify({"message": "Item removed from cart"})
     return jsonify({"error": "Cart item not found"}), 404
+
 
 @app.route("/cart/<int:user_id>", methods=["DELETE"])
 def clear_cart(user_id):
@@ -406,12 +413,13 @@ def get_user_orders(user_id):
     cursor = conn.cursor(dictionary=True)
     cursor.execute(
         "SELECT * FROM v_order_summary WHERE customer_email = (SELECT email FROM users WHERE user_id = %s)",
-        (user_id,)
+        (user_id,),
     )
     orders = cursor.fetchall()
     cursor.close()
     conn.close()
     return jsonify(orders)
+
 
 @app.route("/orders/<int:order_id>/items", methods=["GET"])
 def get_order_items(order_id):
@@ -425,12 +433,13 @@ def get_order_items(order_id):
            FROM order_items oi
            JOIN products p ON oi.product_id = p.product_id
            WHERE oi.order_id = %s""",
-        (order_id,)
+        (order_id,),
     )
     items = cursor.fetchall()
     cursor.close()
     conn.close()
     return jsonify(items)
+
 
 @app.route("/orders", methods=["POST"])
 def create_order():
@@ -450,7 +459,11 @@ def create_order():
     new_order_id = result_args[3]
     cursor.close()
     conn.close()
-    return jsonify({"message": "Order placed successfully", "order_id": new_order_id}), 201
+    return (
+        jsonify({"message": "Order placed successfully", "order_id": new_order_id}),
+        201,
+    )
+
 
 @app.route("/orders/<int:order_id>/status", methods=["PUT"])
 def update_order_status(order_id):
@@ -503,20 +516,28 @@ def validate_discount():
            WHERE code = %s AND is_active = TRUE
              AND (end_date IS NULL OR end_date > NOW())
              AND (max_uses IS NULL OR times_used < max_uses)""",
-        (code,)
+        (code,),
     )
     discount = cursor.fetchone()
     cursor.close()
     conn.close()
 
     if not discount:
-        return jsonify({"valid": False, "error": "Invalid or expired discount code"}), 404
+        return (
+            jsonify({"valid": False, "error": "Invalid or expired discount code"}),
+            404,
+        )
 
     if cart_total < float(discount["min_purchase_amount"]):
-        return jsonify({
-            "valid": False,
-            "error": f"Minimum order of ${discount['min_purchase_amount']} required"
-        }), 400
+        return (
+            jsonify(
+                {
+                    "valid": False,
+                    "error": f"Minimum order of ${discount['min_purchase_amount']} required",
+                }
+            ),
+            400,
+        )
 
     return jsonify({"valid": True, "discount": discount})
 
@@ -528,7 +549,7 @@ def validate_discount():
 def admin_get_orders():
     """Usage: GET /admin/orders?sort_by=date|customer|amount&order=DESC"""
     sort_by = request.args.get("sort_by", "date")
-    order   = request.args.get("order", "DESC").upper()
+    order = request.args.get("order", "DESC").upper()
 
     if order not in ("ASC", "DESC"):
         return jsonify({"error": "order must be ASC or DESC"}), 400
@@ -552,6 +573,7 @@ def admin_get_orders():
     conn.close()
     return jsonify(orders)
 
+
 @app.route("/admin/users", methods=["GET"])
 def admin_get_users():
     conn = get_db()
@@ -568,6 +590,7 @@ def admin_get_users():
     conn.close()
     return jsonify(users)
 
+
 @app.route("/admin/discounts", methods=["GET"])
 def admin_get_discounts():
     conn = get_db()
@@ -580,10 +603,11 @@ def admin_get_discounts():
     conn.close()
     return jsonify(codes)
 
+
 @app.route("/admin/discounts", methods=["POST"])
 def admin_create_discount():
     """Body: { code, description, discount_type, discount_value,
-               min_purchase_amount, max_uses, end_date }"""
+    min_purchase_amount, max_uses, end_date }"""
     data = request.get_json()
     required = ["code", "discount_type", "discount_value"]
     if not all(k in data for k in required):
@@ -599,9 +623,15 @@ def admin_create_discount():
                (code, description, discount_type, discount_value,
                 min_purchase_amount, max_uses, end_date)
                VALUES (%s, %s, %s, %s, %s, %s, %s)""",
-            (data["code"], data.get("description"), data["discount_type"],
-             data["discount_value"], data.get("min_purchase_amount", 0),
-             data.get("max_uses"), data.get("end_date"))
+            (
+                data["code"],
+                data.get("description"),
+                data["discount_type"],
+                data["discount_value"],
+                data.get("min_purchase_amount", 0),
+                data.get("max_uses"),
+                data.get("end_date"),
+            ),
         )
         conn.commit()
         new_id = cursor.lastrowid
@@ -613,5 +643,6 @@ def admin_create_discount():
     conn.close()
     return jsonify({"message": "Discount code created", "discount_id": new_id}), 201
 
+
 if __name__ == "__main__":
-    app.run(debug=True, host='0.0.0.0', port=5001)
+    app.run(debug=True, host="0.0.0.0", port=5001)
