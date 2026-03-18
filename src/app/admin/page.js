@@ -82,10 +82,18 @@ async function getTablesSchemas(sqlTablesNames, setSchema) {
   }
 }
 
+function clearRowStyles(tableName, rowStyles, setRowStyles) {
+  const newRowStyles = { ...rowStyles, [tableName]: undefined };
+  setRowStyles(newRowStyles);
+  return newRowStyles;
+}
+
 async function getTablesData(
   sqlTablesNames,
   oldData,
   setData,
+  rowStyles,
+  setRowStyles,
   doClearBeforeReceiveData = false,
 ) {
   if (doClearBeforeReceiveData) {
@@ -97,6 +105,9 @@ async function getTablesData(
       }
     }
     setData(clearedData);
+    for (const tableName of sqlTablesNames) {
+      rowStyles = clearRowStyles(tableName, rowStyles, setRowStyles);
+    }
     oldData = clearedData;
   }
 
@@ -115,6 +126,7 @@ async function getTablesData(
     const newData = { ...oldData }; // need to do this so refresh button can replace a specific table's data
     for (const [tableName, records] of Object.entries(data)) {
       newData[tableName] = records;
+      rowStyles = clearRowStyles(tableName, rowStyles, setRowStyles);
     }
     setData(newData);
   } catch (err) {
@@ -124,6 +136,77 @@ async function getTablesData(
         sqlTablesNames.map((tableName) => [tableName, "ERROR"]),
       ),
     );
+  }
+}
+
+function typeOfColumn(oneTableSchema, colSqlName) {
+  for (const { sqlName, humanReadableName, sqlType } of oneTableSchema) {
+    if (sqlName === colSqlName) return sqlType;
+  }
+  throw new Error("typeOfColumn : column not found");
+}
+
+async function createEntity(
+  tableName,
+  schema,
+  data,
+  setData,
+  rowStyles,
+  setRowStyles,
+) {
+  try {
+    let whatToDoNext, userEnteredFields, newId;
+    switch (tableName) {
+      case "discount_codes":
+        userEnteredFields = {
+          code: undefined,
+          description: undefined,
+          discount_type: undefined,
+          discount_value: undefined,
+          min_purchase_amount: undefined,
+          max_uses: undefined,
+          end_date: undefined,
+        };
+        whatToDoNext = async () => {
+          const response = await fetch("/api/admin/discounts", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(userEnteredFields),
+          });
+          if (!response.ok) {
+            throw new Error("Failed to create discount code in back end");
+            /*throw new Error(
+              `Failed to create discount code in back end: ${await response.text()}`,
+            );*/
+            // commented out because it can print python stack traces and expose private info
+          }
+          const responseJson = await response.json();
+          newId = responseJson.discount_id;
+        };
+        break;
+
+      default:
+        throw new Error(
+          `Operation not permitted. Cannot create entity in table '${tableName}'`,
+        );
+    }
+
+    for (const paramName of Object.keys(userEnteredFields)) {
+      // TODO: dialog box and entry data types
+      userEnteredFields[paramName] = prompt(
+        `Enter ${paramName} (${typeOfColumn(schema[tableName], paramName)})`,
+      );
+    }
+
+    await whatToDoNext();
+
+    await getTablesData([tableName], data, setData, rowStyles, setRowStyles);
+    setRowStyles({
+      ...rowStyles,
+      [tableName]: { ...rowStyles[tableName], [newId]: "NEW" },
+    });
+  } catch (err) {
+    console.error("Error creating item: ", err);
   }
 }
 
@@ -140,8 +223,8 @@ async function deleteRow(
       throw new Error("Invalid ID");
     }
     setRowStyles({
-      [tableName]: { ...rowStyles[tableName], [id]: "DELETING" },
       ...rowStyles,
+      [tableName]: { ...rowStyles[tableName], [id]: "DELETING" },
     });
     switch (tableName) {
       case "users":
@@ -150,7 +233,7 @@ async function deleteRow(
           headers: { "Content-Type": "application/json" },
         });
         if (!response.ok) throw new Error("Failed to delete in back end");
-        getTablesData(["users"], data, setData);
+        getTablesData(["users"], data, setData, rowStyles, setRowStyles);
         break;
 
       default:
@@ -161,8 +244,8 @@ async function deleteRow(
   } catch (err) {
     console.error("Error deleting row: ", err);
     setRowStyles({
-      [tableName]: { ...rowStyles[tableName], [id]: undefined },
       ...rowStyles,
+      [tableName]: { ...rowStyles[tableName], [id]: undefined },
     });
   }
 }
@@ -178,7 +261,13 @@ export default function Admin() {
   useEffect(() => {
     if (Object.keys(schema).length === 0) return;
 
-    getTablesData(Object.keys(TABLES_NAMES), data, setData);
+    getTablesData(
+      Object.keys(TABLES_NAMES),
+      data,
+      setData,
+      rowStyles,
+      setRowStyles,
+    );
   }, [schema]);
 
   return (
@@ -195,11 +284,31 @@ export default function Admin() {
                     text="Reload"
                     size={0}
                     onClick={() => {
-                      getTablesData([tableName], data, setData, true);
+                      getTablesData(
+                        [tableName],
+                        data,
+                        setData,
+                        rowStyles,
+                        setRowStyles,
+                        true,
+                      );
                     }}
                   />
                   &nbsp;
-                  <Button text="+" size={0} />
+                  <Button
+                    text="+"
+                    size={0}
+                    onClick={() => {
+                      createEntity(
+                        tableName,
+                        schema,
+                        data,
+                        setData,
+                        rowStyles,
+                        setRowStyles,
+                      );
+                    }}
+                  />
                 </div>
                 <h2 className="text-xl font-bold mb-3 ms-4">
                   {TABLES_NAMES[tableName]}

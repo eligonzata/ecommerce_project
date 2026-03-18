@@ -3,6 +3,8 @@ import mysql.connector
 
 from . import app, get_db
 
+from datetime import datetime
+
 
 @app.route("/", methods=["GET"])
 def home():
@@ -635,7 +637,7 @@ def admin_create_discount():
                 data["discount_value"],
                 data.get("min_purchase_amount", 0),
                 data.get("max_uses"),
-                data.get("end_date"),
+                datetime.fromtimestamp(float(data.get("end_date"))),
             ),
         )
         conn.commit()

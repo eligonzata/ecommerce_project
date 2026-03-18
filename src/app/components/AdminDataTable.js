@@ -42,7 +42,7 @@ export default function AdminDataTable({
           <tbody>
             {table.getRowModel().rows.map((row, index) => {
               const rowId = row.getValue(idColName);
-              const tdClassName = `py-2 px-4 ${index == 0 ? "" : "border-t"} ${rowStyles[rowId] === "DELETING" ? "text-red-500 text-bold line-through" : ""}`;
+              const tdClassName = `py-2 px-4 ${index == 0 ? "" : "border-t"} ${rowStyles[rowId] === "DELETING" ? "text-red-500 text-bold line-through" : ""} ${rowStyles[rowId] === "NEW" ? "text-blue-500 text-bold bg-blue-100" : ""}`;
               return (
                 <tr key={rowId}>
                   {row.getVisibleCells().map((cell) => (
