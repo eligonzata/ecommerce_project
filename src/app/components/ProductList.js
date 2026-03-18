@@ -63,7 +63,8 @@ export default function ProductList({ products = [] }) {
             {product.stock_quantity > 0 ? "In Stock" : "Out of Stock"}
           </p>
         </Link>
-      ))}
+        )
+)}
     </div>
   );
 }

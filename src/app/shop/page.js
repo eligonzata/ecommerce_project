@@ -52,8 +52,10 @@ export default function Shop() {
       product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       product.description?.toLowerCase().includes(searchTerm.toLowerCase());
 
-    return matchesSearch;
-  });
+  return matchesSearch;
+});
+  const [availabilityFilter, setAvailabilityFilter] = useState("all");
+  const [priceSort, setPriceSort] = useState("default");
 
   return (
     <div>
@@ -80,7 +82,28 @@ export default function Shop() {
           ))}
         </select>
 
+      
+        <select
+            value={availabilityFilter}
+            onChange={(e) => setAvailabilityFilter(e.target.value)}
+            className="w-full p-2 border border-gray-300 rounded"
+          >
+            <option value="all">Availability</option>
+            <option value="in-stock">In Stock</option>
+            <option value="out-of-stock">Out of Stock</option>
+          </select>
+
+          <select
+            value={priceSort}
+            onChange={(e) => setPriceSort(e.target.value)}
+            className="w-full p-2 border border-gray-300 rounded"
+            >
+              <option value="default">Default Price Order</option>
+              <option value="price-asc">Price: Low → High</option>
+              <option value="price-desc">Price: High → Low</option>
+          </select>
         <ProductList products={filteredProducts} />
+
       </div>
 
       <Footer />
