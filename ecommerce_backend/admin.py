@@ -13,6 +13,57 @@ ADMIN_DASHBOARD_ALLOWED_TABLES = [
     "orders",
 ]
 
+# Blacklist of columns that cannot be queried
+ADMIN_DASHBOARD_DISALLOWED_COLUMNS = {"users": ("password")}
+
+
+@app.route("/multi-table-data", methods=["GET"])
+def get_tables_rows():
+
+    tables_param = request.args.get("tables")
+    if not tables_param:
+        abort(400, description="Missing 'tables' query parameter")
+
+    requested_tables = [t.strip() for t in tables_param.split(",")]
+
+    # Enforce whitelist
+    for table in requested_tables:
+        if table not in ADMIN_DASHBOARD_ALLOWED_TABLES:
+            abort(403, description=f"Table '{table}' is not allowed")
+
+    conn = get_db()
+    if not conn:
+        return jsonify({"error": "Database connection failed"}), 500
+    cursor = conn.cursor(dictionary=True)
+
+    data = {}
+
+    for table_name in requested_tables:
+        cursor.execute(
+            f"""
+            SELECT *
+            FROM {table_name}
+            """,
+        )
+        result = cursor.fetchall()
+        data[table_name] = [
+            {
+                col: v
+                for col, v in row.items()
+                if (  # excludes blacklisted columns
+                    col not in ADMIN_DASHBOARD_DISALLOWED_COLUMNS[table_name]
+                    if table_name in ADMIN_DASHBOARD_DISALLOWED_COLUMNS
+                    else True
+                )
+            }
+            for row in result
+        ]
+
+    cursor.close()
+    conn.close()
+
+    return jsonify(data)
+
 
 @app.route("/schemas", methods=["GET"])
 def get_schema():
@@ -49,6 +100,11 @@ def get_schema():
         schemas[table_name] = [
             {"sqlName": row["COLUMN_NAME"], "sqlType": row["DATA_TYPE"]}
             for row in result
+            if (  # excludes blacklisted columns
+                row["COLUMN_NAME"] not in ADMIN_DASHBOARD_DISALLOWED_COLUMNS[table_name]
+                if table_name in ADMIN_DASHBOARD_DISALLOWED_COLUMNS
+                else True
+            )
         ]
 
     cursor.close()

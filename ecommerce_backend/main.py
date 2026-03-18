@@ -299,6 +299,19 @@ def update_user(user_id):
     return jsonify({"error": "User not found"}), 404
 
 
+@app.route("/users/<int:user_id>", methods=["DELETE"])
+def delete_account(user_id):
+    conn = get_db()
+    if not conn:
+        return jsonify({"error": "Database connection failed"}), 500
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM users WHERE user_id = %s", (user_id,))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return jsonify({"message": f"user deleted"})
+
+
 # CART
 
 

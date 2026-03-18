@@ -3,13 +3,22 @@ import {
   getCoreRowModel,
   flexRender,
 } from "@tanstack/react-table";
+import Button from "./Button";
 
-export default function AdminDataTable({ data, columns }) {
+export default function AdminDataTable({
+  data,
+  columns,
+  rowStyles,
+  deleteHandler,
+  editHandler,
+}) {
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
   });
+
+  const idColName = columns[0].accessorKey;
 
   return (
     <div className="rounded-lg border w-full shadow-md overflow-auto max-h-[50vh]">
@@ -26,22 +35,38 @@ export default function AdminDataTable({ data, columns }) {
                     )}
                   </th>
                 ))}
+                <th className="border-b"></th>
               </tr>
             ))}
           </thead>
           <tbody>
-            {table.getRowModel().rows.map((row, index) => (
-              <tr key={row.id}>
-                {row.getVisibleCells().map((cell) => (
-                  <td
-                    key={cell.id}
-                    className={`py-2 px-4 ${index == 0 ? "" : "border-t"}`}
-                  >
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+            {table.getRowModel().rows.map((row, index) => {
+              const rowId = row.getValue(idColName);
+              const tdClassName = `py-2 px-4 ${index == 0 ? "" : "border-t"} ${rowStyles[rowId] === "DELETING" ? "text-red-500 text-bold line-through" : ""}`;
+              return (
+                <tr key={rowId}>
+                  {row.getVisibleCells().map((cell) => (
+                    <td key={cell.id} className={tdClassName}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
+                    </td>
+                  ))}
+                  <td className={tdClassName + " text-end"}>
+                    <Button text="Edit" size={0} hasBg={false} />
+                    <Button
+                      text="Delete"
+                      size={0}
+                      hasBg={false}
+                      onClick={() => {
+                        deleteHandler(rowId); // WARNING : assumes 1st column is SQL table's primary key
+                      }}
+                    />
                   </td>
-                ))}
-              </tr>
-            ))}
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       ) : data === "LOADING" ? (
