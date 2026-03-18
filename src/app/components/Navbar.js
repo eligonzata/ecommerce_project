@@ -85,9 +85,6 @@ const Navbar = () => {
             >
               Account
             </Link>
-            <Link href="/admin" className="hover:text-gray-300">
-              Admin
-            </Link>
           </div>
         </div>
 
