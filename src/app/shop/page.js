@@ -14,19 +14,19 @@ export default function Shop() {
   const [selectedTag, setSelectedTag] = useState("EVERYTHING");
 
   useEffect(() => {
-  async function loadData() {
-    const productRes = await fetch(`${API_URL}/products`);
-    const productData = await productRes.json();
+    async function loadData() {
+      const productRes = await fetch(`${API_URL}/products`);
+      const productData = await productRes.json();
 
-    const tagRes = await fetch(`${API_URL}/tags`);
-    const tagData = await tagRes.json();
+      const tagRes = await fetch(`${API_URL}/tags`);
+      const tagData = await tagRes.json();
 
-    setProducts(productData);
-    setTags(tagData);
-  }
+      setProducts(productData);
+      setTags(tagData);
+    }
 
-  loadData();
-}, []);
+    loadData();
+  }, []);
 
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value);
@@ -45,13 +45,12 @@ export default function Shop() {
       const data = await res.json();
       setProducts(data);
     }
-};
+  };
 
-const filteredProducts = products.filter(product => {
-
-  const matchesSearch =
-    product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.description?.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredProducts = products.filter((product) => {
+    const matchesSearch =
+      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.description?.toLowerCase().includes(searchTerm.toLowerCase());
 
   return matchesSearch;
 });
@@ -63,7 +62,6 @@ const filteredProducts = products.filter(product => {
       <Navbar />
 
       <div className="flex flex-col items-center p-4">
-
         <input
           type="text"
           placeholder="Search for products..."
@@ -73,18 +71,16 @@ const filteredProducts = products.filter(product => {
         />
 
         <select
-        value={selectedTag}
-        onChange={handleTagChange}
-        className="w-full max-w-md p-2 border border-gray-300 rounded mb-4"
+          value={selectedTag}
+          onChange={handleTagChange}
+          className="w-full max-w-md p-2 border border-gray-300 rounded mb-4"
         >
-
-        {tags.map(tag => (
-          <option key={tag.tag_id} value={tag.tag_name}>
-            {tag.tag_name}
-          </option>
-        ))}
-
-      </select>
+          {tags.map((tag) => (
+            <option key={tag.tag_id} value={tag.tag_name}>
+              {tag.tag_name}
+            </option>
+          ))}
+        </select>
 
       
         <select

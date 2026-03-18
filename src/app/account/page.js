@@ -23,28 +23,35 @@ export default function Account() {
     setLoading(true);
 
     try {
-      const response = await fetch(`${API_URL}/users?email=${encodeURIComponent(email)}`);
-      
+      const response = await fetch(
+        `${API_URL}/users?email=${encodeURIComponent(email)}`,
+      );
+
       if (!response.ok) {
         throw new Error("Invalid email or password");
       }
 
       const users = await response.json();
-      const user = Array.isArray(users) ? users.find(u => u.email === email) : null;
-      
+      const user = Array.isArray(users)
+        ? users.find((u) => u.email === email)
+        : null;
+
       if (!user) {
         throw new Error("Invalid email or password");
       }
 
       if (user.password === password) {
         setSuccessMessage("Login successful!");
-        localStorage.setItem("user", JSON.stringify({ 
-          id: user.user_id, 
-          email: user.email,
-          name: `${user.first_name} ${user.last_name}`,
-          role: user.user_role
-        }));
-        
+        localStorage.setItem(
+          "user",
+          JSON.stringify({
+            id: user.user_id,
+            email: user.email,
+            name: `${user.first_name} ${user.last_name}`,
+            role: user.user_role,
+          }),
+        );
+
         setTimeout(() => router.push("/"), 1000);
       } else {
         throw new Error("Invalid email or password");
@@ -69,8 +76,7 @@ export default function Account() {
           />
         </div>
 
-        {/* Logo */}
-        <div className="absolute top-5 right-[26%] md:right-[22%] z-10 md:block">
+        <div className="absolute top-5 right-[26%] md:right-[26%] z-10 md:block">
           <img
             src="/img/logo.png"
             alt="Scent Sanctuary Logo"
@@ -84,7 +90,10 @@ export default function Account() {
               Welcome to Scent Sanctuary
             </h1>
 
-            <form onSubmit={handleSubmit} className="flex flex-col items-center">
+            <form
+              onSubmit={handleSubmit}
+              className="flex flex-col items-center"
+            >
               <label htmlFor="email" className="mb-1">
                 Email:
               </label>
@@ -109,9 +118,7 @@ export default function Account() {
                 className="w-full mb-4 p-2 border border-gray-300 rounded"
               />
 
-              {error && (
-                <p className="text-red-600 mb-2">{error}</p>
-              )}
+              {error && <p className="text-red-600 mb-2">{error}</p>}
               {successMessage && (
                 <p className="text-green-600 mb-2">{successMessage}</p>
               )}

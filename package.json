@@ -3,6 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "flask-dev": "flask --app ecommerce_backend.main --debug run -p 5001",
+    "flask": "flask --app ecommerce_backend.main run -p 5001",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
@@ -10,6 +12,7 @@
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
+    "@tanstack/react-table": "^8.21.3",
     "next": "16.1.6",
     "react": "19.2.3",
     "react-awesome-reveal": "^4.3.1",
@@ -17,6 +20,7 @@
     "react-icons": "^5.5.0"
   },
   "devDependencies": {
+    "@faker-js/faker": "^10.3.0",
     "@tailwindcss/postcss": "^4",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",

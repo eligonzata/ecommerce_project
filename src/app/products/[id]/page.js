@@ -56,8 +56,8 @@ export default function ProductPage() {
         body: JSON.stringify({
           user_id: userId,
           product_id: product.id,
-          quantity: 1
-        })
+          quantity: 1,
+        }),
       });
 
       if (!response.ok) throw new Error("Failed to add to cart");
@@ -100,13 +100,9 @@ export default function ProductPage() {
             </div>
 
             <div className="flex flex-col items-center text-center max-w-xl">
-              <h1 className="text-3xl font-bold mt-4">
-                {product.name}
-              </h1>
+              <h1 className="text-3xl font-bold mt-4">{product.name}</h1>
 
-              <p className="text-gray-600 mt-2">
-                {product.description}
-              </p>
+              <p className="text-gray-600 mt-2">{product.description}</p>
 
               <div className="flex flex-col mt-4 space-y-2">
                 {product.is_on_sale ? (
@@ -124,9 +120,7 @@ export default function ProductPage() {
                   </p>
                 )}
 
-                <p className="text-lg">
-                  Available: {product.stock_quantity}
-                </p>
+                <p className="text-lg">Available: {product.stock_quantity}</p>
 
                 <p className="text-sm text-gray-500">
                   Wick Type: {product.wick_type}
@@ -143,10 +137,10 @@ export default function ProductPage() {
                     : "bg-gray-400 text-gray-200 cursor-not-allowed"
                 }`}
               >
-                {addingToCart 
-                  ? "Adding..." 
-                  : product.stock_quantity > 0 
-                    ? "Add to Cart" 
+                {addingToCart
+                  ? "Adding..."
+                  : product.stock_quantity > 0
+                    ? "Add to Cart"
                     : "Out of Stock"}
               </button>
             </div>

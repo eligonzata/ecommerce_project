@@ -50,7 +50,7 @@ function Cart() {
   }, [userId]);
 
   const calculateSubtotal = () => {
-    return cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+    return cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
   };
 
   const calculateTax = (subtotal) => {
@@ -59,7 +59,7 @@ function Cart() {
 
   const calculateDiscount = (subtotal) => {
     if (!discount) return 0;
-    if (discount.discount_type === 'percentage') {
+    if (discount.discount_type === "percentage") {
       return subtotal * (discount.discount_value / 100);
     } else {
       return discount.discount_value;
@@ -79,7 +79,7 @@ function Cart() {
       const response = await fetch(`${API_URL}/cart/${userId}/${productId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ quantity: newQuantity })
+        body: JSON.stringify({ quantity: newQuantity }),
       });
 
       if (!response.ok) throw new Error("Failed to update cart");
@@ -96,12 +96,12 @@ function Cart() {
   const removeFromCart = async (productId) => {
     try {
       const response = await fetch(`${API_URL}/cart/${userId}/${productId}`, {
-        method: "DELETE"
+        method: "DELETE",
       });
 
       if (!response.ok) throw new Error("Failed to remove item");
 
-      setCartItems(cartItems.filter(item => item.product_id !== productId));
+      setCartItems(cartItems.filter((item) => item.product_id !== productId));
     } catch (err) {
       console.error("Failed to remove item:", err);
       setError("Could not remove item. Please try again.");
@@ -116,7 +116,7 @@ function Cart() {
       const response = await fetch(`${API_URL}/discounts/validate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code: discountCode, cart_total: subtotal })
+        body: JSON.stringify({ code: discountCode, cart_total: subtotal }),
       });
 
       if (!response.ok) {
@@ -146,8 +146,8 @@ function Cart() {
         body: JSON.stringify({
           user_id: userId,
           payment_method: "Credit Card",
-          discount_code: discount?.code || ""
-        })
+          discount_code: discount?.code || "",
+        }),
       });
 
       if (!response.ok) throw new Error("Failed to create order");
@@ -155,7 +155,7 @@ function Cart() {
       const data = await response.json();
       setCheckoutMessage("Thank you for shopping with us!! 🎉");
       setCartItems([]);
-      
+
       setTimeout(() => {
         router.push(`/`);
       }, 2000);
@@ -205,121 +205,141 @@ function Cart() {
               </Link>
             </div>
           </div>
-        ) : !loading && !isEmpty && (
-          <div>
-            <div className="cart-items bg-white rounded-lg shadow-lg p-6 mb-6">
-              {cartItems.map((item) => (
-                <div
-                  key={item.product_id}
-                  className="cart-item flex flex-col sm:flex-row sm:items-center sm:justify-between py-4 border-b border-gray-200 gap-4"
-                >
-                  <div className="flex items-center">
-                    <div className="relative w-24 h-24 mr-4">
-                      <Image
-                        src={item.image_url || "/img/placeholder.png"}
-                        alt={item.product_name}
-                        fill
-                        className="object-cover rounded-md"
-                        sizes="96px"
-                      />
+        ) : (
+          !loading &&
+          !isEmpty && (
+            <div>
+              <div className="cart-items bg-white rounded-lg shadow-lg p-6 mb-6">
+                {cartItems.map((item) => (
+                  <div
+                    key={item.product_id}
+                    className="cart-item flex flex-col sm:flex-row sm:items-center sm:justify-between py-4 border-b border-gray-200 gap-4"
+                  >
+                    <div className="flex items-center">
+                      <div className="relative w-24 h-24 mr-4">
+                        <Image
+                          src={item.image_url || "/img/placeholder.png"}
+                          alt={item.product_name}
+                          fill
+                          className="object-cover rounded-md"
+                          sizes="96px"
+                        />
+                      </div>
+
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-800">
+                          {item.product_name}
+                        </h3>
+                        <span className="text-sm text-gray-500">
+                          Price: ${item.price.toFixed(2)}
+                        </span>
+                      </div>
                     </div>
 
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-800">{item.product_name}</h3>
-                      <span className="text-sm text-gray-500">Price: ${item.price.toFixed(2)}</span>
+                    <div className="flex items-center space-x-4">
+                      <select
+                        className="border rounded-md p-2"
+                        value={item.quantity}
+                        onChange={(e) =>
+                          updateQuantity(
+                            item.product_id,
+                            parseInt(e.target.value),
+                          )
+                        }
+                        aria-label={`Quantity for ${item.product_name}`}
+                      >
+                        {[...Array(10)].map((_, index) => (
+                          <option key={index + 1} value={index + 1}>
+                            {index + 1}
+                          </option>
+                        ))}
+                      </select>
+
+                      <button
+                        type="button"
+                        onClick={() => removeFromCart(item.product_id)}
+                        className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"
+                      >
+                        Remove
+                      </button>
                     </div>
                   </div>
-
-                  <div className="flex items-center space-x-4">
-                    <select
-                      className="border rounded-md p-2"
-                      value={item.quantity}
-                      onChange={(e) => updateQuantity(item.product_id, parseInt(e.target.value))}
-                      aria-label={`Quantity for ${item.product_name}`}
-                    >
-                      {[...Array(10)].map((_, index) => (
-                        <option key={index + 1} value={index + 1}>
-                          {index + 1}
-                        </option>
-                      ))}
-                    </select>
-
-                    <button
-                      type="button"
-                      onClick={() => removeFromCart(item.product_id)}
-                      className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"
-                    >
-                      Remove
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-              <div className="flex gap-4">
-                <input
-                  type="text"
-                  placeholder="Enter discount code"
-                  value={discountCode}
-                  onChange={(e) => setDiscountCode(e.target.value)}
-                  className="flex-1 p-2 border border-gray-300 rounded"
-                />
-                <button
-                  onClick={validateDiscount}
-                  className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-                >
-                  Apply
-                </button>
+                ))}
               </div>
-              {discount && (
-                <p className="text-green-600 mt-2">
-                  Discount applied: {discount.description}
-                </p>
-              )}
-            </div>
 
-            <div className="cart-summary bg-white rounded-lg shadow-lg p-6">
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span>Subtotal:</span>
-                  <span>${calculateSubtotal().toFixed(2)}</span>
+              <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+                <div className="flex gap-4">
+                  <input
+                    type="text"
+                    placeholder="Enter discount code"
+                    value={discountCode}
+                    onChange={(e) => setDiscountCode(e.target.value)}
+                    className="flex-1 p-2 border border-gray-300 rounded"
+                  />
+                  <button
+                    onClick={validateDiscount}
+                    className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+                  >
+                    Apply
+                  </button>
                 </div>
                 {discount && (
-                  <div className="flex justify-between text-green-600">
-                    <span>Discount:</span>
-                    <span>-${calculateDiscount(calculateSubtotal()).toFixed(2)}</span>
-                  </div>
+                  <p className="text-green-600 mt-2">
+                    Discount applied: {discount.description}
+                  </p>
                 )}
-                <div className="flex justify-between">
-                  <span>Tax (8.25%):</span>
-                  <span>${calculateTax(calculateSubtotal() - calculateDiscount(calculateSubtotal())).toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between text-xl font-bold pt-4 border-t">
-                  <span>Total:</span>
-                  <span>${calculateTotal().toFixed(2)}</span>
-                </div>
               </div>
 
-              <div className="flex flex-col sm:flex-row justify-center gap-4 mt-6">
-                <button
-                  type="button"
-                  onClick={handleCheckout}
-                  className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition duration-300 transform hover:scale-105"
-                >
-                  Checkout
-                </button>
+              <div className="cart-summary bg-white rounded-lg shadow-lg p-6">
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span>Subtotal:</span>
+                    <span>${calculateSubtotal().toFixed(2)}</span>
+                  </div>
+                  {discount && (
+                    <div className="flex justify-between text-green-600">
+                      <span>Discount:</span>
+                      <span>
+                        -${calculateDiscount(calculateSubtotal()).toFixed(2)}
+                      </span>
+                    </div>
+                  )}
+                  <div className="flex justify-between">
+                    <span>Tax (8.25%):</span>
+                    <span>
+                      $
+                      {calculateTax(
+                        calculateSubtotal() -
+                          calculateDiscount(calculateSubtotal()),
+                      ).toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-xl font-bold pt-4 border-t">
+                    <span>Total:</span>
+                    <span>${calculateTotal().toFixed(2)}</span>
+                  </div>
+                </div>
 
-                <button
-                  type="button"
-                  onClick={() => router.back()}
-                  className="bg-gray-300 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-400 transition duration-300 transform hover:scale-105"
-                >
-                  Continue Shopping
-                </button>
+                <div className="flex flex-col sm:flex-row justify-center gap-4 mt-6">
+                  <button
+                    type="button"
+                    onClick={handleCheckout}
+                    className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition duration-300 transform hover:scale-105"
+                  >
+                    Checkout
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => router.back()}
+                    className="bg-gray-300 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-400 transition duration-300 transform hover:scale-105"
+                  >
+                    Continue Shopping
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
+          )
         )}
       </div>
 
