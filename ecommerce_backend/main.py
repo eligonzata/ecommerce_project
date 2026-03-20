@@ -32,6 +32,7 @@ def health_check():
 # PRODUCTS
 
 #modified this so that whenever filters are applied they are stacked on eachother
+#used in shop/page.js
 @app.route("/products", methods=["GET"])
 def get_products():
     tag = request.args.get("tag")
@@ -66,7 +67,7 @@ def get_products():
     conn.close()
     return jsonify(products)
 
-
+#not sure if this is used
 @app.route("/products/sale", methods=["GET"])
 def get_sale_products():
     conn = get_db()
@@ -81,7 +82,7 @@ def get_sale_products():
     conn.close()
     return jsonify(products)
 
-
+#don't think this is used either
 @app.route("/products/search", methods=["GET"])
 def search_products():
     """Usage: GET /products/search?q=lavender"""
@@ -102,34 +103,9 @@ def search_products():
     return jsonify(products)
 
 
-@app.route("/products/sort", methods=["GET"])
-def get_sorted_products():
-    """Usage: GET /products/sort?by=price&order=ASC
-    GET /products/sort?by=availability"""
-    sort_by = request.args.get("by", "price")
-    order = request.args.get("order", "ASC").upper()
+#removed products/sort app route because it is now handled in products
 
-    if order not in ("ASC", "DESC"):
-        return jsonify({"error": "order must be ASC or DESC"}), 400
-
-    conn = get_db()
-    if not conn:
-        return jsonify({"error": "Database connection failed"}), 500
-    cursor = conn.cursor(dictionary=True)
-
-    if sort_by == "availability":
-        cursor.callproc("sp_get_products_by_availability")
-    else:
-        cursor.callproc("sp_get_products_by_price", [order])
-
-    products = []
-    for result in cursor.stored_results():
-        products = result.fetchall()
-    cursor.close()
-    conn.close()
-    return jsonify(products)
-
-
+#this is used in products/[id]/page.js
 @app.route("/products/<int:product_id>", methods=["GET"])
 def get_product(product_id):
     conn = get_db()
@@ -138,7 +114,8 @@ def get_product(product_id):
     cursor = conn.cursor(dictionary=True)
 
     cursor.execute(
-        "SELECT product_id AS id, name, description, price, sale_price, is_on_sale, image_url AS image, stock_quantity, wick_type FROM products WHERE product_id = %s",
+        """SELECT product_id AS id, name, description, price, sale_price, is_on_sale, image_url AS image, 
+        stock_quantity, wick_type FROM products WHERE product_id = %s""",
         (product_id,),
     )
 
@@ -153,6 +130,7 @@ def get_product(product_id):
 
 
 # this is for the home page tagged products section
+#used in app/page.js (index)
 @app.route("/products/tagged", methods=["GET"])
 def get_products_by_tag():
     tag = request.args.get("tag")
@@ -191,6 +169,7 @@ def get_products_by_tag():
 
 
 # this one is used for the tag filtering on the products page
+#not sure if this is necessary but is used in shop/page.js
 @app.route("/tags", methods=["GET"])
 def get_tags():
     conn = get_db()

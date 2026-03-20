@@ -24,7 +24,7 @@ function Cart() {
     if (user?.id) {
       setUserId(user.id);
     } else {
-      setUserId(2);
+      router.push("/account");
     }
   }, []);
 
@@ -231,7 +231,7 @@ function Cart() {
                           {item.product_name}
                         </h3>
                         <span className="text-sm text-gray-500">
-                          Price: ${item.price.toFixed(2)}
+                          Price: ${item.price} 
                         </span>
                       </div>
                     </div>
