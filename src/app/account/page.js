@@ -41,6 +41,7 @@ export default function Account() {
       }
 
       if (user.password === password) {
+        // TODO: don't send back the password and check successful login like this
         setSuccessMessage("Login successful!");
         localStorage.setItem(
           "user",

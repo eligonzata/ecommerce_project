@@ -60,8 +60,6 @@ const Footer = () => {
             />
           </div>
 
-          
-
           {/* TODO: maybe add company name */}
           <p className="text-gray-600">&copy; 2026 LLC, all rights reserved.</p>
         </div>
