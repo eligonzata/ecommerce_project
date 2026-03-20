@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 import Navbar from "../components/Navbar";
@@ -12,11 +12,12 @@ import { useAuth } from "../../context/AuthContext";
 export default function AccountManagement() {
   const router = useRouter();
   const { user, logout } = useAuth();
-  if (user === null) {
-    // not logged in
-    router.push("/account"); // redirects to login page
-  }
-
+  useEffect(() => {
+    if (user === null) {
+      // not logged in
+      router.push("/sign-in"); // redirects to login page
+    }
+  }, [user]);
   const [openSection, setOpenSection] = useState("personal");
 
   const [formData, setFormData] = useState({

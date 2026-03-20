@@ -6,8 +6,6 @@ import Link from "next/link";
 import { ShoppingCartIcon } from "@heroicons/react/24/solid";
 import { useAuth } from "../../context/AuthContext";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
-
 const Navbar = () => {
   const [cartCount, setCartCount] = useState(0);
   const { user, logout } = useAuth();
@@ -30,11 +28,11 @@ const Navbar = () => {
   };
 
   useEffect(() => {
-    if (!user.id) return;
+    if (!user?.id) return;
 
     const fetchCartCount = async () => {
       try {
-        const response = await fetch(`${API_URL}/cart/${user.id}`);
+        const response = await fetch(`/api/cart/${user.id}`);
         if (response.ok) {
           const items = await response.json();
           setCartCount(items.reduce((sum, item) => sum + item.quantity, 0));

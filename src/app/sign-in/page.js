@@ -6,8 +6,6 @@ import Footer from "../components/Footer";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
-
 export default function Account() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -24,7 +22,7 @@ export default function Account() {
 
     try {
       const response = await fetch(
-        `${API_URL}/users?email=${encodeURIComponent(email)}`,
+        `/api/users?email=${encodeURIComponent(email)}`,
       );
 
       if (!response.ok) {
