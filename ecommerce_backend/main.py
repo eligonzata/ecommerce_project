@@ -31,14 +31,36 @@ def health_check():
 
 # PRODUCTS
 
-
+#modified this so that whenever filters are applied they are stacked on eachother
 @app.route("/products", methods=["GET"])
 def get_products():
+    tag = request.args.get("tag")
+    avail = request.args.get("avail")
+    price = request.args.get("price")
     conn = get_db()
     if not conn:
         return jsonify({"error": "Database connection failed"}), 500
     cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM v_product_catalog ORDER BY name")
+    stmt = """SELECT DISTINCT p.*
+        FROM v_product_catalog AS p
+        JOIN product_tags AS pt ON p.product_id = pt.product_id
+        JOIN tags AS t ON pt.tag_id = t.tag_id
+        WHERE 1=1"""
+    params=[]
+    if tag and tag != "EVERYTHING":
+        stmt += " AND t.tag_name=%s"
+        params.append(tag)
+    if(avail=="in-stock"):
+        stmt+=" AND stock_quantity>0"
+    elif(avail=="out-of-stock"):
+        stmt+=" AND stock_quantity<=0"
+    if(price=="price-asc"):
+        stmt+=" ORDER BY p.current_price ASC"
+    elif(price=="price-desc"):
+        stmt+=" ORDER BY p.current_price DESC"
+    else:
+        stmt+=" ORDER BY name"
+    cursor.execute(stmt,params)
     products = cursor.fetchall()
     cursor.close()
     conn.close()

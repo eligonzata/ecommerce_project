@@ -12,40 +12,28 @@ export default function Shop() {
   const [tags, setTags] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedTag, setSelectedTag] = useState("EVERYTHING");
-
+  const [availabilityFilter, setAvailabilityFilter] = useState("all");
+  const [priceSort, setPriceSort] = useState("default");
+  //load in all of the tags
   useEffect(() => {
-    async function loadData() {
-      const productRes = await fetch(`${API_URL}/products`);
-      const productData = await productRes.json();
-
-      const tagRes = await fetch(`${API_URL}/tags`);
-      const tagData = await tagRes.json();
-
-      setProducts(productData);
-      setTags(tagData);
+    async function loadTags() {
+      const res = await fetch(`${API_URL}/tags`);
+      const data = await res.json();
+      setTags(data);
     }
 
-    loadData();
+    loadTags();
   }, []);
+
+  // Fetch products whenever filters change
+  useEffect(() => {
+    fetchProducts();
+  }, [selectedTag, availabilityFilter, priceSort]);
 
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value);
   };
 
-  const handleTagChange = async (event) => {
-    const tag = event.target.value;
-    setSelectedTag(tag);
-
-    if (tag === "EVERYTHING") {
-      const res = await fetch(`${API_URL}/products`);
-      const data = await res.json();
-      setProducts(data);
-    } else {
-      const res = await fetch(`${API_URL}/products/tagged?tag=${tag}`);
-      const data = await res.json();
-      setProducts(data);
-    }
-  };
 
   const filteredProducts = products.filter((product) => {
     const matchesSearch =
@@ -54,9 +42,13 @@ export default function Shop() {
 
   return matchesSearch;
 });
-  const [availabilityFilter, setAvailabilityFilter] = useState("all");
-  const [priceSort, setPriceSort] = useState("default");
-
+//how to fetch the products
+async function fetchProducts() {
+      const url = `${API_URL}/products?tag=${selectedTag}&avail=${availabilityFilter}&price=${priceSort}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      setProducts(data);
+    }
   return (
     <div>
       <Navbar />
@@ -72,7 +64,11 @@ export default function Shop() {
 
         <select
           value={selectedTag}
-          onChange={handleTagChange}
+          onChange={(e) => {
+            const value = e.target.value;
+            setSelectedTag(value);
+            fetchProducts(value, availabilityFilter, priceSort);
+          }}
           className="w-full max-w-md p-2 border border-gray-300 rounded mb-4"
         >
           {tags.map((tag) => (
@@ -85,7 +81,11 @@ export default function Shop() {
       
         <select
             value={availabilityFilter}
-            onChange={(e) => setAvailabilityFilter(e.target.value)}
+            onChange={(e) => {
+              const value = e.target.value;
+              setAvailabilityFilter(value);
+              fetchProducts(selectedTag, value, priceSort);
+            }}
             className="w-full p-2 border border-gray-300 rounded"
           >
             <option value="all">Availability</option>
@@ -95,7 +95,11 @@ export default function Shop() {
 
           <select
             value={priceSort}
-            onChange={(e) => setPriceSort(e.target.value)}
+            onChange={(e) => {
+              const value = e.target.value;
+              setPriceSort(value);
+              fetchProducts(selectedTag, availabilityFilter, value);
+            }}
             className="w-full p-2 border border-gray-300 rounded"
             >
               <option value="default">Default Price Order</option>
