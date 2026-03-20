@@ -72,7 +72,7 @@ const Navbar = () => {
               About us
             </Link>
             <Link
-              href={user !== null ? "/my-account" : "/sign-in"}
+              href={user !== null ? "./my-account" : "./sign-in"}
               className="bg-gradient-to-r text-transparent bg-clip-text from-[#FF6F61] to-[#FFD700] hover:opacity-90"
             >
               {user !== null ? "Account" : "Sign In"}
