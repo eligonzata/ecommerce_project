@@ -4,12 +4,11 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ShoppingCartIcon } from "@heroicons/react/24/solid";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
+import { useAuth } from "../../context/AuthContext";
 
 const Navbar = () => {
   const [cartCount, setCartCount] = useState(0);
-  const [userId, setUserId] = useState(null);
+  const { user, logout } = useAuth();
 
   const navbarBackgroundColor = "#641414";
   const textColor = "#FFFFFF";
@@ -29,18 +28,11 @@ const Navbar = () => {
   };
 
   useEffect(() => {
-    const user = JSON.parse(localStorage.getItem("user") || "null");
-    if (user?.id) {
-      setUserId(user.id);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!userId) return;
+    if (!user?.id) return;
 
     const fetchCartCount = async () => {
       try {
-        const response = await fetch(`${API_URL}/cart/${userId}`);
+        const response = await fetch(`/api/cart/${user.id}`);
         if (response.ok) {
           const items = await response.json();
           setCartCount(items.reduce((sum, item) => sum + item.quantity, 0));
@@ -54,7 +46,7 @@ const Navbar = () => {
 
     const interval = setInterval(fetchCartCount, 5000);
     return () => clearInterval(interval);
-  }, [userId]);
+  }, [user]);
 
   return (
     <nav
@@ -80,10 +72,10 @@ const Navbar = () => {
               About us
             </Link>
             <Link
-              href="/account"
+              href={user !== null ? "/my-account" : "/sign-in"}
               className="bg-gradient-to-r text-transparent bg-clip-text from-[#FF6F61] to-[#FFD700] hover:opacity-90"
             >
-              Account
+              {user !== null ? "Account" : "Sign In"}
             </Link>
           </div>
         </div>

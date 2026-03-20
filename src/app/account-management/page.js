@@ -1,36 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import SectionCard from "../components/SectionCard";
 
-function SectionCard({
-  title,
-  isOpen,
-  onToggle,
-  children,
-}) {
-  return (
-    <div className="w-full rounded-2xl border border-gray-200 bg-white shadow-sm">
-      <button
-        type="button"
-        onClick={onToggle}
-        className="flex w-full items-center justify-between px-6 py-5 text-left"
-      >
-        <span className="text-lg font-semibold text-[#641414]">{title}</span>
-        <span className="text-2xl text-gray-500">{isOpen ? "−" : "+"}</span>
-      </button>
-
-      {isOpen && (
-        <div className="border-t border-gray-200 px-6 py-5">
-          {children}
-        </div>
-      )}
-    </div>
-  );
-}
+import { useAuth } from "../../context/AuthContext";
 
 export default function AccountManagement() {
+  const router = useRouter();
+  const { user, logout } = useAuth();
+  useEffect(() => {
+    if (user === null) {
+      // not logged in
+      router.push("/sign-in"); // redirects to login page
+    }
+  }, [user]);
   const [openSection, setOpenSection] = useState("personal");
 
   const [formData, setFormData] = useState({
@@ -94,7 +81,11 @@ export default function AccountManagement() {
     setMessage("");
     setError("");
 
-    if (!formData.currentPassword || !formData.newPassword || !formData.confirmPassword) {
+    if (
+      !formData.currentPassword ||
+      !formData.newPassword ||
+      !formData.confirmPassword
+    ) {
       setError("Please fill out all password fields.");
       return;
     }
@@ -127,7 +118,9 @@ export default function AccountManagement() {
       <div className="min-h-screen bg-[#f7f2ec] px-4 py-10">
         <div className="mx-auto max-w-3xl">
           <div className="mb-8 text-center">
-            <h1 className="text-3xl font-bold text-[#641414]">Account Management</h1>
+            <h1 className="text-3xl font-bold text-[#641414]">
+              Account Management
+            </h1>
             <p className="mt-2 text-gray-600">
               Manage your personal details, contact information, and password.
             </p>
@@ -147,26 +140,83 @@ export default function AccountManagement() {
             )}
           </div>
 
-          <div className="flex flex-col gap-5">
-            <SectionCard
-              title="Personal Information"
-              isOpen={openSection === "personal"}
-              onToggle={() => toggleSection("personal")}
-            >
-              <form onSubmit={handleSavePersonal} className="flex flex-col gap-4">
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          {user !== undefined ? (
+            <div className="flex flex-col gap-5">
+              <SectionCard
+                title="Personal Information"
+                isOpen={openSection === "personal"}
+                onToggle={() => toggleSection("personal")}
+              >
+                <form
+                  onSubmit={handleSavePersonal}
+                  className="flex flex-col gap-4"
+                >
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <div>
+                      <label
+                        htmlFor="firstName"
+                        className="mb-1 block text-sm font-medium text-gray-700"
+                      >
+                        First Name
+                      </label>
+                      <input
+                        type="text"
+                        id="firstName"
+                        name="firstName"
+                        value={formData.firstName}
+                        onChange={handleChange}
+                        className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#641414]"
+                      />
+                    </div>
+
+                    <div>
+                      <label
+                        htmlFor="lastName"
+                        className="mb-1 block text-sm font-medium text-gray-700"
+                      >
+                        Last Name
+                      </label>
+                      <input
+                        type="text"
+                        id="lastName"
+                        name="lastName"
+                        value={formData.lastName}
+                        onChange={handleChange}
+                        className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#641414]"
+                      />
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="w-full rounded-lg bg-[#641414] px-4 py-2.5 font-medium text-white transition hover:bg-[#4f1010] md:w-fit"
+                  >
+                    Save Personal Info
+                  </button>
+                </form>
+              </SectionCard>
+
+              <SectionCard
+                title="Contact Information"
+                isOpen={openSection === "contact"}
+                onToggle={() => toggleSection("contact")}
+              >
+                <form
+                  onSubmit={handleSaveContact}
+                  className="flex flex-col gap-4"
+                >
                   <div>
                     <label
-                      htmlFor="firstName"
+                      htmlFor="email"
                       className="mb-1 block text-sm font-medium text-gray-700"
                     >
-                      First Name
+                      Email Address
                     </label>
                     <input
-                      type="text"
-                      id="firstName"
-                      name="firstName"
-                      value={formData.firstName}
+                      type="email"
+                      id="email"
+                      name="email"
+                      value={formData.email}
                       onChange={handleChange}
                       className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#641414]"
                     />
@@ -174,147 +224,105 @@ export default function AccountManagement() {
 
                   <div>
                     <label
-                      htmlFor="lastName"
+                      htmlFor="phone"
                       className="mb-1 block text-sm font-medium text-gray-700"
                     >
-                      Last Name
+                      Phone Number
                     </label>
                     <input
-                      type="text"
-                      id="lastName"
-                      name="lastName"
-                      value={formData.lastName}
+                      type="tel"
+                      id="phone"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      placeholder="(555) 555-5555"
+                      className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#641414]"
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="w-full rounded-lg bg-[#641414] px-4 py-2.5 font-medium text-white transition hover:bg-[#4f1010] md:w-fit"
+                  >
+                    Save Contact Info
+                  </button>
+                </form>
+              </SectionCard>
+
+              <SectionCard
+                title="Security"
+                isOpen={openSection === "security"}
+                onToggle={() => toggleSection("security")}
+              >
+                <form
+                  onSubmit={handleSavePassword}
+                  className="flex flex-col gap-4"
+                >
+                  <div>
+                    <label
+                      htmlFor="currentPassword"
+                      className="mb-1 block text-sm font-medium text-gray-700"
+                    >
+                      Current Password
+                    </label>
+                    <input
+                      type="password"
+                      id="currentPassword"
+                      name="currentPassword"
+                      value={formData.currentPassword}
                       onChange={handleChange}
                       className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#641414]"
                     />
                   </div>
-                </div>
 
-                <button
-                  type="submit"
-                  className="w-full rounded-lg bg-[#641414] px-4 py-2.5 font-medium text-white transition hover:bg-[#4f1010] md:w-fit"
-                >
-                  Save Personal Info
-                </button>
-              </form>
-            </SectionCard>
+                  <div>
+                    <label
+                      htmlFor="newPassword"
+                      className="mb-1 block text-sm font-medium text-gray-700"
+                    >
+                      New Password
+                    </label>
+                    <input
+                      type="password"
+                      id="newPassword"
+                      name="newPassword"
+                      value={formData.newPassword}
+                      onChange={handleChange}
+                      className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#641414]"
+                    />
+                  </div>
 
-            <SectionCard
-              title="Contact Information"
-              isOpen={openSection === "contact"}
-              onToggle={() => toggleSection("contact")}
-            >
-              <form onSubmit={handleSaveContact} className="flex flex-col gap-4">
-                <div>
-                  <label
-                    htmlFor="email"
-                    className="mb-1 block text-sm font-medium text-gray-700"
+                  <div>
+                    <label
+                      htmlFor="confirmPassword"
+                      className="mb-1 block text-sm font-medium text-gray-700"
+                    >
+                      Confirm New Password
+                    </label>
+                    <input
+                      type="password"
+                      id="confirmPassword"
+                      name="confirmPassword"
+                      value={formData.confirmPassword}
+                      onChange={handleChange}
+                      className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#641414]"
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="w-full rounded-lg bg-[#641414] px-4 py-2.5 font-medium text-white transition hover:bg-[#4f1010] md:w-fit"
                   >
-                    Email Address
-                  </label>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#641414]"
-                  />
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="phone"
-                    className="mb-1 block text-sm font-medium text-gray-700"
-                  >
-                    Phone Number
-                  </label>
-                  <input
-                    type="tel"
-                    id="phone"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    placeholder="(555) 555-5555"
-                    className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#641414]"
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  className="w-full rounded-lg bg-[#641414] px-4 py-2.5 font-medium text-white transition hover:bg-[#4f1010] md:w-fit"
-                >
-                  Save Contact Info
-                </button>
-              </form>
-            </SectionCard>
-
-            <SectionCard
-              title="Security"
-              isOpen={openSection === "security"}
-              onToggle={() => toggleSection("security")}
-            >
-              <form onSubmit={handleSavePassword} className="flex flex-col gap-4">
-                <div>
-                  <label
-                    htmlFor="currentPassword"
-                    className="mb-1 block text-sm font-medium text-gray-700"
-                  >
-                    Current Password
-                  </label>
-                  <input
-                    type="password"
-                    id="currentPassword"
-                    name="currentPassword"
-                    value={formData.currentPassword}
-                    onChange={handleChange}
-                    className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#641414]"
-                  />
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="newPassword"
-                    className="mb-1 block text-sm font-medium text-gray-700"
-                  >
-                    New Password
-                  </label>
-                  <input
-                    type="password"
-                    id="newPassword"
-                    name="newPassword"
-                    value={formData.newPassword}
-                    onChange={handleChange}
-                    className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#641414]"
-                  />
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="confirmPassword"
-                    className="mb-1 block text-sm font-medium text-gray-700"
-                  >
-                    Confirm New Password
-                  </label>
-                  <input
-                    type="password"
-                    id="confirmPassword"
-                    name="confirmPassword"
-                    value={formData.confirmPassword}
-                    onChange={handleChange}
-                    className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#641414]"
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  className="w-full rounded-lg bg-[#641414] px-4 py-2.5 font-medium text-white transition hover:bg-[#4f1010] md:w-fit"
-                >
-                  Update Password
-                </button>
-              </form>
-            </SectionCard>
-          </div>
+                    Update Password
+                  </button>
+                </form>
+              </SectionCard>
+            </div>
+          ) : (
+            <div className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3">
+              Loading…
+            </div>
+          )}
         </div>
       </div>
 

@@ -5,10 +5,11 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
+import { useAuth } from "@/context/AuthContext";
 
 export default function Account() {
+  const { user, login, logout } = useAuth();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -24,7 +25,7 @@ export default function Account() {
 
     try {
       const response = await fetch(
-        `${API_URL}/users?email=${encodeURIComponent(email)}`,
+        `/api/users?email=${encodeURIComponent(email)}`,
       );
 
       if (!response.ok) {
@@ -41,16 +42,15 @@ export default function Account() {
       }
 
       if (user.password === password) {
+        // TODO: don't send back the password and check successful login like this
         setSuccessMessage("Login successful!");
-        localStorage.setItem(
-          "user",
-          JSON.stringify({
-            id: user.user_id,
-            email: user.email,
-            name: `${user.first_name} ${user.last_name}`,
-            role: user.user_role,
-          }),
-        );
+        const localStorageUserData = {
+          id: user.user_id,
+          email: user.email,
+          name: `${user.first_name} ${user.last_name}`,
+          role: user.user_role,
+        };
+        login(localStorageUserData);
 
         setTimeout(() => router.push("/"), 1000);
       } else {
