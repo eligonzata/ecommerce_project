@@ -9,6 +9,7 @@ import { useAuth } from "../../context/AuthContext";
 const Navbar = () => {
   const [cartCount, setCartCount] = useState(0);
   const { user, logout } = useAuth();
+  const [mounted, setMounted] = useState(false);
 
   const navbarBackgroundColor = "#641414";
   const textColor = "#FFFFFF";
@@ -26,6 +27,10 @@ const Navbar = () => {
     color: textColor,
     ...commonStyles,
   };
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (!user?.id) return;
@@ -48,6 +53,8 @@ const Navbar = () => {
     return () => clearInterval(interval);
   }, [user]);
 
+  if (!mounted) return null;
+  
   return (
     <nav
       style={navbarStyles}
@@ -72,7 +79,7 @@ const Navbar = () => {
               About us
             </Link>
             <Link
-              href={user !== null ? "./my-account" : "./sign-in"}
+              href={user !== null ? "/my-account" : "/sign-in"}
               className="bg-gradient-to-r text-transparent bg-clip-text from-[#FF6F61] to-[#FFD700] hover:opacity-90"
             >
               {user !== null ? "Account" : "Sign In"}

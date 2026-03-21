@@ -276,9 +276,9 @@ def get_user(user_id):
 
 @app.route("/users/<int:user_id>", methods=["PUT"])
 def update_user(user_id):
-    """Body (any combination): { first_name, last_name, phone }"""
+    """Body (any combination): { first_name, last_name, phone, email }"""
     data = request.get_json()
-    allowed = ["first_name", "last_name", "phone"]
+    allowed = ["first_name", "last_name", "phone", "email"]
     updates = {k: v for k, v in data.items() if k in allowed}
 
     if not updates:

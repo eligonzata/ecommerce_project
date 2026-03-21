@@ -8,10 +8,12 @@ import Footer from "../components/Footer";
 import SectionCard from "../components/SectionCard";
 
 import { useAuth } from "../../context/AuthContext";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
+
 
 export default function AccountManagement() {
   const router = useRouter();
-  const { user, logout } = useAuth();
+  const { user, setUser, logout } = useAuth();
   useEffect(() => {
     if (user === null) {
       // not logged in
@@ -47,29 +49,69 @@ export default function AccountManagement() {
       [name]: value,
     }));
   };
-
-  const handleSavePersonal = (e) => {
+  //added async
+  const handleSavePersonal = async (e) => {
     e.preventDefault();
     setMessage("");
     setError("");
 
     try {
-      // BACKEND TODO: send firstName and lastName to update profile endpoint
-      setMessage("Personal information updated successfully. (Placeholder)");
+      //made it take from backend
+      const response = await fetch(`${API_URL}/users/${user.id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+        body: JSON.stringify({
+          first_name: formData.firstName,
+          last_name: formData.lastName,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to update user");
+      }
+      setMessage("Personal information updated successfully!");
+      //updates the user currently so we don't fetch again from backend this could probably be done better
+      user.name = formData.firstName + " " + formData.lastName;
     } catch (err) {
       console.error(err);
       setError("Could not update personal information.");
     }
   };
 
-  const handleSaveContact = (e) => {
+  const handleSaveContact = async (e) => {
     e.preventDefault();
     setMessage("");
     setError("");
 
     try {
-      // BACKEND TODO: send email and phone to update profile endpoint
-      setMessage("Contact information updated successfully. (Placeholder)");
+      const updates = {};
+
+      if (formData.email) updates.email = formData.email;
+      if (formData.phone) updates.phone = formData.phone;
+
+      if (Object.keys(updates).length === 0) {
+        setError("Please enter at least one field to update.");
+        return;
+      }
+
+      const response = await fetch(`${API_URL}/users/${user.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updates),
+      });
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to update user");
+      }
+      //updates the user currently so we don't fetch again from backend this could probably be done better
+      user.email = formData.email;
+      setMessage("Contact information updated successfully.");
     } catch (err) {
       console.error(err);
       setError("Could not update contact information.");
@@ -165,6 +207,7 @@ export default function AccountManagement() {
                         name="firstName"
                         value={formData.firstName}
                         onChange={handleChange}
+                        required
                         className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#641414]"
                       />
                     </div>
@@ -182,6 +225,7 @@ export default function AccountManagement() {
                         name="lastName"
                         value={formData.lastName}
                         onChange={handleChange}
+                        required
                         className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#641414]"
                       />
                     </div>

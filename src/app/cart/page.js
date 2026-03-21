@@ -6,6 +6,7 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useAuth } from "src/context/AuthContext";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
 
@@ -18,13 +19,14 @@ function Cart() {
   const [discount, setDiscount] = useState(null);
   const [userId, setUserId] = useState(null);
   const router = useRouter();
+  const { user } = useAuth();
 
   useEffect(() => {
-    const user = JSON.parse(localStorage.getItem("user") || "null");
+    
     if (user?.id) {
       setUserId(user.id);
     } else {
-      router.push("/account");
+      router.push("/sign-in");
     }
   }, []);
 
@@ -135,7 +137,7 @@ function Cart() {
 
   const handleCheckout = async () => {
     if (!userId) {
-      router.push("/account");
+      router.push("/sign-in");
       return;
     }
 
