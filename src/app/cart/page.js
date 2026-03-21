@@ -135,6 +135,7 @@ function Cart() {
     }
   };
 
+  //still need to have some form of payment processing
   const handleCheckout = async () => {
     if (!userId) {
       router.push("/sign-in");

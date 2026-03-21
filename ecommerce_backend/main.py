@@ -82,7 +82,6 @@ def get_sale_products():
     conn.close()
     return jsonify(products)
 
-#don't think this is used either
 @app.route("/products/search", methods=["GET"])
 def search_products():
     """Usage: GET /products/search?q=lavender"""
@@ -273,7 +272,7 @@ def get_user(user_id):
         return jsonify(user)
     return jsonify({"error": "User not found"}), 404
 
-
+#pused in account_management/page.js
 @app.route("/users/<int:user_id>", methods=["PUT"])
 def update_user(user_id):
     """Body (any combination): { first_name, last_name, phone, email }"""
@@ -448,7 +447,7 @@ def get_order_items(order_id):
     conn.close()
     return jsonify(items)
 
-
+#used in cart/page.js
 @app.route("/orders", methods=["POST"])
 def create_order():
     """Body: { user_id, payment_method, discount_code (optional) }"""
