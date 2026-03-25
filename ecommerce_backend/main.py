@@ -1,6 +1,6 @@
 from flask import jsonify, request
 import mysql.connector
-
+import bcrypt
 from . import app, get_db
 
 from datetime import datetime
@@ -237,7 +237,7 @@ def register_user():
                 data["first_name"],
                 data["last_name"],
                 data["email"],
-                data["password"],
+                bcrypt.hashpw(data["password"].encode("utf-8"),bcrypt.gensalt()).decode("utf-8"), #added so users passwords are hashed
                 data.get("phone"),
             ),
         )
@@ -251,7 +251,37 @@ def register_user():
     conn.close()
     return jsonify({"message": "User registered successfully", "user_id": new_id}), 201
 
-
+@app.route("/login", methods=["POST"]) # new login route that checks the email and password against the database
+def login():
+    """Body: { email, password }"""
+    data = request.get_json()
+    if not data.get("email") or not data.get("password"):
+        return jsonify({"error": "Email and password required"}), 400
+ 
+    conn = get_db()
+    if not conn:
+        return jsonify({"error": "Database connection failed"}), 500
+ 
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM users WHERE email = %s", (data["email"],))
+    user = cursor.fetchone()
+    cursor.close()
+    conn.close()
+ 
+    if not user:
+        return jsonify({"error": "Invalid email or password"}), 401
+ 
+    if bcrypt.checkpw(data["password"].encode("utf-8"), user["password"].encode("utf-8")):
+        return jsonify({
+            "user_id": user["user_id"],
+            "email": user["email"],
+            "first_name": user["first_name"],
+            "last_name": user["last_name"],
+            "user_role": user["user_role"],
+        })
+    else:
+        return jsonify({"error": "Invalid email or password"}), 401
+ 
 @app.route("/users/<int:user_id>", methods=["GET"])
 def get_user(user_id):
     conn = get_db()
@@ -272,6 +302,38 @@ def get_user(user_id):
         return jsonify(user)
     return jsonify({"error": "User not found"}), 404
 
+@app.route("/users/<int:user_id>/password", methods=["PUT"]) #allows users to update their password used in account management/page.js
+def update_password(user_id):
+    """Body: { current_password, new_password }"""
+    data = request.get_json()
+    if not data.get("current_password") or not data.get("new_password"):
+        return jsonify({"error": "current_password and new_password are required"}), 400
+ 
+    conn = get_db()
+    if not conn:
+        return jsonify({"error": "Database connection failed"}), 500
+ 
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT password FROM users WHERE user_id = %s", (user_id,))
+    user = cursor.fetchone()
+ 
+    if not user:
+        cursor.close()
+        conn.close()
+        return jsonify({"error": "User not found"}), 404
+ 
+    if not bcrypt.checkpw(data["current_password"].encode("utf-8"), user["password"].encode("utf-8")):
+        cursor.close()
+        conn.close()
+        return jsonify({"error": "Current password is incorrect"}), 401
+ 
+    new_hashed = bcrypt.hashpw(data["new_password"].encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+    cursor.execute("UPDATE users SET password = %s WHERE user_id = %s", (new_hashed, user_id))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return jsonify({"message": "Password updated successfully"})
+ 
 #pused in account_management/page.js
 @app.route("/users/<int:user_id>", methods=["PUT"])
 def update_user(user_id):

@@ -117,30 +117,39 @@ export default function AccountManagement() {
       setError("Could not update contact information.");
     }
   };
-
-  const handleSavePassword = (e) => {
+// added functionality this function calls /user/<id>/password to update the users password
+  const handleSavePassword = async (e) => {
     e.preventDefault();
     setMessage("");
     setError("");
-
-    if (
-      !formData.currentPassword ||
-      !formData.newPassword ||
-      !formData.confirmPassword
-    ) {
+ 
+    if (!formData.currentPassword || !formData.newPassword || !formData.confirmPassword) {
       setError("Please fill out all password fields.");
       return;
     }
-
+ 
     if (formData.newPassword !== formData.confirmPassword) {
       setError("New password and confirm password do not match.");
       return;
     }
-
+ 
     try {
-      // BACKEND TODO: send currentPassword and newPassword to password update endpoint
-      setMessage("Password updated successfully. (Placeholder)");
-
+      const response = await fetch(`${API_URL}/users/${user.id}/password`, { //calls the new route in main.py to update the users password
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          current_password: formData.currentPassword, //sends the current password to verify before updating
+          new_password: formData.newPassword,
+        }),
+      });
+ 
+      const data = await response.json();
+ 
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to update password");
+      }
+ 
+      setMessage("Password updated successfully!");
       setFormData((prev) => ({
         ...prev,
         currentPassword: "",
@@ -149,7 +158,7 @@ export default function AccountManagement() {
       }));
     } catch (err) {
       console.error(err);
-      setError("Could not update password.");
+      setError(err.message);
     }
   };
 

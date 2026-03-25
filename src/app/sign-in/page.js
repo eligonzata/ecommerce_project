@@ -16,46 +16,35 @@ export default function Account() {
   const [successMessage, setSuccessMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e) => {            //changed to use new login route 
     e.preventDefault();
     setError("");
     setSuccessMessage("");
     setLoading(true);
 
     try {
-      const response = await fetch(
-        `/api/users?email=${encodeURIComponent(email)}`,
-      );
+      const response = await fetch(`/api/login`, {
+        method: "POST", // calls the new login route in main.py
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
 
       if (!response.ok) {
         throw new Error("Invalid email or password");
       }
 
-      const users = await response.json();
-      const user = Array.isArray(users)
-        ? users.find((u) => u.email === email)
-        : null;
+      const user = await response.json();
 
-      if (!user) {
-        throw new Error("Invalid email or password");
-      }
+      setSuccessMessage("Login successful!");
+      const localStorageUserData = {
+        id: user.user_id,
+        email: user.email,
+        name: `${user.first_name} ${user.last_name}`,
+        role: user.user_role,
+      };
+      login(localStorageUserData);
 
-      if (user.password === password) {
-        // TODO: don't send back the password and check successful login like this
-        setSuccessMessage("Login successful!");
-        const localStorageUserData = {
-          id: user.user_id,
-          email: user.email,
-          name: `${user.first_name} ${user.last_name}`,
-          role: user.user_role,
-        };
-        login(localStorageUserData);
-
-        setTimeout(() => router.push("/"), 1000);
-      } else {
-        throw new Error("Invalid email or password");
-      }
+      setTimeout(() => router.push("/"), 1000);
     } catch (err) {
       setError(err.message);
     } finally {
