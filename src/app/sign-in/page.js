@@ -43,8 +43,12 @@ export default function Account() {
         role: user.user_role,
       };
       login(localStorageUserData);
-
-      setTimeout(() => router.push("/"), 1000);
+      if(user.user_role==="customer"){
+          setTimeout(() => router.push("/"), 1000);
+      }else{
+          setTimeout(() => router.push("/admin"), 1000);
+      }
+      
     } catch (err) {
       setError(err.message);
     } finally {

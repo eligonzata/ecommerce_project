@@ -51,7 +51,7 @@ export default function Register() {
       setFormData({ first_name: "", last_name: "", email: "", password: "", phone: "" });
       
       setTimeout(() => {
-        router.push("/account");
+        router.push("/sign-in");
       }, 2000);
     } catch (err) {
       setError(err.message);
