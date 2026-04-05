@@ -54,7 +54,10 @@ const Navbar = () => {
   }, [user]);
 
   if (!mounted) return null;
-  
+
+  const isAdmin =
+    user !== null && String(user.role || "").toLowerCase() === "admin";
+
   return (
     <nav
       style={navbarStyles}
@@ -78,6 +81,11 @@ const Navbar = () => {
             <Link href="/aboutus" className="hover:text-gray-300">
               About us
             </Link>
+            {isAdmin ? (
+              <Link href="/admin" className="hover:text-gray-300">
+                Admin
+              </Link>
+            ) : null}
             <Link
               href={user !== null ? "/my-account" : "/sign-in"}
               className="bg-gradient-to-r text-transparent bg-clip-text from-[#FF6F61] to-[#FFD700] hover:opacity-90"

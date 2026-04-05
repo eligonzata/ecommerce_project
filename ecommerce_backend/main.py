@@ -566,7 +566,11 @@ def update_order_status(order_id):
 
 @app.route("/discounts/validate", methods=["POST"])
 def validate_discount():
-    """Body: { code, cart_total }"""
+    """Body: { code, cart_total }
+
+    On success: increments discount_codes.times_used once (redemption counted at apply time).
+    Checkout must not increment again — see sp_create_order_from_cart.
+    """
     data = request.get_json()
     code = data.get("code")
     cart_total = data.get("cart_total", 0)
@@ -588,16 +592,18 @@ def validate_discount():
         (code,),
     )
     discount = cursor.fetchone()
-    cursor.close()
-    conn.close()
 
     if not discount:
+        cursor.close()
+        conn.close()
         return (
             jsonify({"valid": False, "error": "Invalid or expired discount code"}),
             404,
         )
 
     if cart_total < float(discount["min_purchase_amount"]):
+        cursor.close()
+        conn.close()
         return (
             jsonify(
                 {
@@ -608,6 +614,44 @@ def validate_discount():
             400,
         )
 
+    # Count a use when the customer applies the code in the cart (atomic re-check of limits).
+    try:
+        upd = conn.cursor()
+        upd.execute(
+            """
+            UPDATE discount_codes
+            SET times_used = COALESCE(times_used, 0) + 1
+            WHERE discount_id = %s
+              AND is_active = TRUE
+              AND (end_date IS NULL OR end_date > NOW())
+              AND (max_uses IS NULL OR times_used < max_uses)
+            """,
+            (discount["discount_id"],),
+        )
+        if upd.rowcount != 1:
+            conn.rollback()
+            upd.close()
+            cursor.close()
+            conn.close()
+            return (
+                jsonify(
+                    {
+                        "valid": False,
+                        "error": "This discount code is no longer available",
+                    }
+                ),
+                409,
+            )
+        conn.commit()
+        upd.close()
+    except mysql.connector.Error:
+        conn.rollback()
+        cursor.close()
+        conn.close()
+        return jsonify({"valid": False, "error": "Could not apply discount code"}), 500
+
+    cursor.close()
+    conn.close()
     return jsonify({"valid": True, "discount": discount})
 
 
@@ -685,6 +729,21 @@ def admin_create_discount():
     conn = get_db()
     if not conn:
         return jsonify({"error": "Database connection failed"}), 500
+    end_raw = data.get("end_date")
+    if end_raw is None or end_raw == "":
+        end_date_val = None
+    else:
+        try:
+            end_date_val = datetime.fromtimestamp(float(end_raw))
+        except (TypeError, ValueError):
+            try:
+                s = str(end_raw).strip()
+                if s.endswith("Z"):
+                    s = s[:-1] + "+00:00"
+                end_date_val = datetime.fromisoformat(s)
+            except ValueError:
+                return jsonify({"error": "Invalid end_date"}), 400
+
     cursor = conn.cursor()
     try:
         cursor.execute(
@@ -699,7 +758,7 @@ def admin_create_discount():
                 data["discount_value"],
                 data.get("min_purchase_amount", 0),
                 data.get("max_uses"),
-                datetime.fromtimestamp(float(data.get("end_date"))),
+                end_date_val,
             ),
         )
         conn.commit()

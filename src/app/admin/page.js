@@ -1,42 +1,29 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import Button from "../components/Button";
 import AdminDataTable from "../components/AdminDataTable";
+import AdminCreateModal from "../components/AdminCreateModal";
 
 /**
  * Converts a camelCase or snake_case string to a human-readable format.
- * Examples: "helloWorld" -> "Hello world", "hello_world" -> "Hello world"
- *
- * @param {string} str The input string.
- * @returns {string} The human-readable string.
  */
 function toHumanReadable(str) {
   if (!str) {
     return "";
   }
-
-  // 1. Handle snake_case and kebab-case: replace underscores/hyphens with spaces
   let result = str.replace(/[_-]+/g, " ");
-
-  // 2. Handle camelCase: add a space before capital letters
   result = result.replace(/([a-z])([A-Z])/g, "$1 $2");
-
-  // 3. Capitalize the first letter of the entire string and ensure the rest is lowercase
   result = result.charAt(0).toUpperCase() + result.slice(1).toLowerCase();
-
-  // Optional: Capitalize the first letter of every word (Title Case)
   result = result
     .split(" ")
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
     .join(" ");
-
   return result;
 }
 
-// TODO: globalize this func
 function urlGetParams(path, params) {
   let url;
   try {
@@ -51,14 +38,127 @@ function urlGetParams(path, params) {
   return url.toString();
 }
 
+/** Must match ecommerce_backend/admin.py ADMIN_DASHBOARD_ALLOWED_TABLES */
 const TABLES_NAMES = {
   users: "Users",
-  v_product_catalog: "Product Catalog",
   discount_codes: "Discount Codes",
   products: "Products",
   orders: "Orders",
   tags: "Tags",
 };
+
+const ORDERS_SORT_DEFAULT = "default";
+
+/** Column order when sorted API returns no rows (matches v_admin_orders). */
+const ORDERS_VIEW_COLUMNS_FALLBACK = [
+  "order_id",
+  "order_date",
+  "user_id",
+  "customer_name",
+  "email",
+  "subtotal",
+  "tax_amount",
+  "discount_amount",
+  "total_amount",
+  "order_status",
+  "payment_status",
+  "payment_method",
+];
+
+function ordersSortToQuery(sortKey) {
+  switch (sortKey) {
+    case "date_desc":
+      return { sort_by: "date", order: "DESC" };
+    case "date_asc":
+      return { sort_by: "date", order: "ASC" };
+    case "customer":
+      return { sort_by: "customer", order: "DESC" };
+    case "amount_desc":
+      return { sort_by: "amount", order: "DESC" };
+    case "amount_asc":
+      return { sort_by: "amount", order: "ASC" };
+    default:
+      return { sort_by: "date", order: "DESC" };
+  }
+}
+
+async function fetchOrdersSortedRows(sortKey) {
+  const q = ordersSortToQuery(sortKey);
+  const res = await fetch(urlGetParams("/api/admin/orders", q));
+  if (!res.ok) throw new Error("Failed to fetch sorted orders");
+  return res.json();
+}
+
+function buildOrderViewColumnSpecs(schemaOrderCols, sampleRow) {
+  const keys =
+    sampleRow && typeof sampleRow === "object"
+      ? Object.keys(sampleRow)
+      : ORDERS_VIEW_COLUMNS_FALLBACK;
+  const byName = Object.fromEntries(
+    (schemaOrderCols || []).map((c) => [c.sqlName, c]),
+  );
+  return keys.map((sqlName) => {
+    const fromSchema = byName[sqlName];
+    const readOnly = sqlName === "customer_name" || sqlName === "email";
+    return {
+      accessorKey: sqlName,
+      header: toHumanReadable(sqlName),
+      meta: {
+        sqlType: fromSchema?.sqlType || "varchar",
+        columnKey:
+          fromSchema?.columnKey || (sqlName === "order_id" ? "PRI" : ""),
+        isNullable: fromSchema?.isNullable ?? true,
+        readOnly,
+      },
+    };
+  });
+}
+
+function primaryKeyFromColumns(tableColumns) {
+  const pk = tableColumns.find((c) => c.columnKey === "PRI");
+  return pk?.sqlName ?? tableColumns[0]?.sqlName;
+}
+
+function columnsForTableDisplay(tableName, tableColumns) {
+  return tableColumns.filter(
+    (c) => !(tableName === "users" && c.sqlName === "password"),
+  );
+}
+
+function coerceValueForApi(raw, sqlType, sqlName, isNullable) {
+  if (raw === null) return null;
+  const t = (sqlType || "").toLowerCase();
+
+  if (typeof raw === "string") {
+    const trimmed = raw.trim();
+    if (trimmed === "") {
+      if (isNullable) return null;
+      throw new Error("Value cannot be empty");
+    }
+
+    if (["int", "bigint", "smallint", "mediumint", "integer"].includes(t)) {
+      const n = parseInt(trimmed, 10);
+      if (Number.isNaN(n)) throw new Error("Invalid integer");
+      return n;
+    }
+    if (["decimal", "numeric", "float", "double"].includes(t)) {
+      const n = parseFloat(trimmed);
+      if (Number.isNaN(n)) throw new Error("Invalid number");
+      return n;
+    }
+    if (t === "tinyint" && ["is_active", "is_on_sale"].includes(sqlName)) {
+      const low = trimmed.toLowerCase();
+      if (low === "true" || low === "1") return 1;
+      if (low === "false" || low === "0") return 0;
+      throw new Error("Use true or false (or 1 / 0)");
+    }
+    if (["datetime", "timestamp", "date"].includes(t)) {
+      return trimmed;
+    }
+    return raw;
+  }
+  return raw;
+}
 
 async function getTablesSchemas(sqlTablesNames, setSchema) {
   try {
@@ -82,33 +182,23 @@ async function getTablesSchemas(sqlTablesNames, setSchema) {
   }
 }
 
-function clearRowStyles(tableName, rowStyles, setRowStyles) {
-  const newRowStyles = { ...rowStyles, [tableName]: undefined };
-  setRowStyles(newRowStyles);
-  return newRowStyles;
-}
-
 async function getTablesData(
   sqlTablesNames,
-  oldData,
   setData,
-  rowStyles,
   setRowStyles,
   doClearBeforeReceiveData = false,
 ) {
   if (doClearBeforeReceiveData) {
-    const clearedData = { ...oldData };
-    for (const tableName of Object.keys(clearedData)) {
-      if (sqlTablesNames.includes(tableName)) {
-        // shows loading state when user clicks [reload]
-        delete clearedData[tableName];
+    setData((prev) => {
+      const cleared = { ...prev };
+      for (const tableName of sqlTablesNames) {
+        delete cleared[tableName];
       }
-    }
-    setData(clearedData);
+      return cleared;
+    });
     for (const tableName of sqlTablesNames) {
-      rowStyles = clearRowStyles(tableName, rowStyles, setRowStyles);
+      setRowStyles((prev) => ({ ...prev, [tableName]: undefined }));
     }
-    oldData = clearedData;
   }
 
   try {
@@ -122,130 +212,25 @@ async function getTablesData(
       },
     );
     if (!response.ok) throw new Error("Failed to fetch tables' data");
-    const data = await response.json();
-    const newData = { ...oldData }; // need to do this so refresh button can replace a specific table's data
-    for (const [tableName, records] of Object.entries(data)) {
-      newData[tableName] = records;
-      rowStyles = clearRowStyles(tableName, rowStyles, setRowStyles);
+    const payload = await response.json();
+    setData((prev) => {
+      const next = { ...prev };
+      for (const [tableName, records] of Object.entries(payload)) {
+        next[tableName] = records;
+      }
+      return next;
+    });
+    for (const tableName of sqlTablesNames) {
+      setRowStyles((prev) => ({ ...prev, [tableName]: undefined }));
     }
-    setData(newData);
   } catch (err) {
     console.error("Data fetch error: ", err);
-    setData(
-      Object.fromEntries(
-        sqlTablesNames.map((tableName) => [tableName, "ERROR"]),
-      ),
-    );
-  }
-}
-
-function typeOfColumn(oneTableSchema, colSqlName) {
-  for (const { sqlName, humanReadableName, sqlType } of oneTableSchema) {
-    if (sqlName === colSqlName) return sqlType;
-  }
-  throw new Error("typeOfColumn : column not found");
-}
-
-async function createEntity(
-  tableName,
-  schema,
-  data,
-  setData,
-  rowStyles,
-  setRowStyles,
-) {
-  try {
-    let whatToDoNext, userEnteredFields, newId;
-    switch (tableName) {
-      case "discount_codes":
-        userEnteredFields = {
-          code: undefined,
-          description: undefined,
-          discount_type: undefined,
-          discount_value: undefined,
-          min_purchase_amount: undefined,
-          max_uses: undefined,
-          end_date: undefined,
-        };
-        whatToDoNext = async () => {
-          const response = await fetch("/api/admin/discounts", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(userEnteredFields),
-          });
-          if (!response.ok) {
-            throw new Error("Failed to create discount code in back end");
-            /*throw new Error(
-              `Failed to create discount code in back end: ${await response.text()}`,
-            );*/
-            // commented out because it can print python stack traces and expose private info
-          }
-          const responseJson = await response.json();
-          newId = responseJson.discount_id;
-        };
-        break;
-
-      default:
-        throw new Error(
-          `Operation not permitted. Cannot create entity in table '${tableName}'`,
-        );
-    }
-
-    for (const paramName of Object.keys(userEnteredFields)) {
-      // TODO: dialog box and entry data types
-      userEnteredFields[paramName] = prompt(
-        `Enter ${paramName} (${typeOfColumn(schema[tableName], paramName)})`,
-      );
-    }
-
-    await whatToDoNext();
-
-    await getTablesData([tableName], data, setData, rowStyles, setRowStyles);
-    setRowStyles({
-      ...rowStyles,
-      [tableName]: { ...rowStyles[tableName], [newId]: "NEW" },
-    });
-  } catch (err) {
-    console.error("Error creating item: ", err);
-  }
-}
-
-async function deleteRow(
-  tableName,
-  id,
-  rowStyles,
-  setRowStyles,
-  data,
-  setData,
-) {
-  try {
-    if (Number.isNaN(typeof id === Number ? id : parseInt(id))) {
-      throw new Error("Invalid ID");
-    }
-    setRowStyles({
-      ...rowStyles,
-      [tableName]: { ...rowStyles[tableName], [id]: "DELETING" },
-    });
-    switch (tableName) {
-      case "users":
-        const response = await fetch("/api/users/" + id, {
-          method: "DELETE",
-          headers: { "Content-Type": "application/json" },
-        });
-        if (!response.ok) throw new Error("Failed to delete in back end");
-        getTablesData(["users"], data, setData, rowStyles, setRowStyles);
-        break;
-
-      default:
-        throw new Error(
-          `Operation not permitted. Cannot delete entity from table '${tableName}'`,
-        );
-    }
-  } catch (err) {
-    console.error("Error deleting row: ", err);
-    setRowStyles({
-      ...rowStyles,
-      [tableName]: { ...rowStyles[tableName], [id]: undefined },
+    setData((prev) => {
+      const next = { ...prev };
+      for (const tableName of sqlTablesNames) {
+        next[tableName] = "ERROR";
+      }
+      return next;
     });
   }
 }
@@ -254,29 +239,244 @@ export default function Admin() {
   const [schema, setSchema] = useState({});
   const [data, setData] = useState({});
   const [rowStyles, setRowStyles] = useState({});
+  const [createModalTable, setCreateModalTable] = useState(null);
+  const [ordersSort, setOrdersSort] = useState(ORDERS_SORT_DEFAULT);
+  const [ordersViewData, setOrdersViewData] = useState(null);
+  const [ordersSortLoading, setOrdersSortLoading] = useState(false);
+
   useEffect(() => {
-    // fetches tables' schemas on startup
     getTablesSchemas(Object.keys(TABLES_NAMES), setSchema);
   }, []);
+
   useEffect(() => {
     if (Object.keys(schema).length === 0) return;
 
-    getTablesData(
-      Object.keys(TABLES_NAMES),
-      data,
-      setData,
-      rowStyles,
-      setRowStyles,
-    );
+    getTablesData(Object.keys(TABLES_NAMES), setData, setRowStyles);
   }, [schema]);
+
+  useEffect(() => {
+    if (ordersSort === ORDERS_SORT_DEFAULT) {
+      setOrdersViewData(null);
+      setOrdersSortLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+    setOrdersSortLoading(true);
+    (async () => {
+      try {
+        const rows = await fetchOrdersSortedRows(ordersSort);
+        if (!cancelled) setOrdersViewData(rows);
+      } catch (err) {
+        console.error(err);
+        if (!cancelled) setOrdersViewData([]);
+      } finally {
+        if (!cancelled) setOrdersSortLoading(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [ordersSort]);
+
+  const handleCellSave = useCallback(
+    async (tableName, rowId, columnKey, _oldValue, newRaw) => {
+      const tableColumns = schema[tableName];
+      if (!tableColumns) return;
+      const colMeta = tableColumns.find((c) => c.sqlName === columnKey);
+      if (!colMeta) return;
+
+      let coerced;
+      try {
+        coerced = coerceValueForApi(
+          newRaw,
+          colMeta.sqlType,
+          columnKey,
+          colMeta.isNullable,
+        );
+      } catch (e) {
+        window.alert(e.message || "Invalid value");
+        return;
+      }
+
+      const id = typeof rowId === "number" ? rowId : parseInt(rowId, 10);
+      if (Number.isNaN(id)) {
+        window.alert("Invalid row id");
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          `/api/admin/table/${tableName}/row/${id}`,
+          {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ [columnKey]: coerced }),
+          },
+        );
+        if (!response.ok) {
+          const j = await response.json().catch(() => ({}));
+          window.alert(j.error || "Update failed");
+          return;
+        }
+        await getTablesData([tableName], setData, setRowStyles);
+        if (tableName === "orders" && ordersSort !== ORDERS_SORT_DEFAULT) {
+          try {
+            const rows = await fetchOrdersSortedRows(ordersSort);
+            setOrdersViewData(rows);
+          } catch (e) {
+            console.error(e);
+          }
+        }
+      } catch (err) {
+        console.error(err);
+        window.alert("Update failed");
+      }
+    },
+    [schema, ordersSort],
+  );
+
+  const handleDelete = useCallback(
+    async (tableName, rowId) => {
+      if (
+        !window.confirm(
+          "Delete this row permanently? This may fail if other records reference it.",
+        )
+      ) {
+        return;
+      }
+      const id = typeof rowId === "number" ? rowId : parseInt(rowId, 10);
+      if (Number.isNaN(id)) {
+        window.alert("Invalid row id");
+        return;
+      }
+
+      setRowStyles((prev) => ({
+        ...prev,
+        [tableName]: { ...prev[tableName], [id]: "DELETING" },
+      }));
+
+      try {
+        const response = await fetch(
+          `/api/admin/table/${tableName}/row/${id}`,
+          { method: "DELETE" },
+        );
+        if (!response.ok) {
+          const j = await response.json().catch(() => ({}));
+          window.alert(j.error || "Delete failed");
+          setRowStyles((prev) => ({
+            ...prev,
+            [tableName]: { ...prev[tableName], [id]: undefined },
+          }));
+          return;
+        }
+        await getTablesData([tableName], setData, setRowStyles);
+        if (tableName === "orders" && ordersSort !== ORDERS_SORT_DEFAULT) {
+          try {
+            const rows = await fetchOrdersSortedRows(ordersSort);
+            setOrdersViewData(rows);
+          } catch (e) {
+            console.error(e);
+          }
+        }
+      } catch (err) {
+        console.error(err);
+        window.alert("Delete failed");
+        setRowStyles((prev) => ({
+          ...prev,
+          [tableName]: { ...prev[tableName], [id]: undefined },
+        }));
+      }
+    },
+    [ordersSort],
+  );
+
+  const handleCreateSubmit = useCallback(
+    async (payload) => {
+      if (!createModalTable) return;
+      const tableName = createModalTable;
+      try {
+        const response = await fetch(`/api/admin/table/${tableName}/row`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        const j = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          window.alert(j.error || "Create failed");
+          return;
+        }
+        setCreateModalTable(null);
+        const newId = j.id;
+        await getTablesData([tableName], setData, setRowStyles);
+        if (tableName === "orders" && ordersSort !== ORDERS_SORT_DEFAULT) {
+          try {
+            const rows = await fetchOrdersSortedRows(ordersSort);
+            setOrdersViewData(rows);
+          } catch (e) {
+            console.error(e);
+          }
+        }
+        if (newId != null) {
+          setRowStyles((prev) => ({
+            ...prev,
+            [tableName]: { ...prev[tableName], [newId]: "NEW" },
+          }));
+        }
+      } catch (err) {
+        console.error(err);
+        window.alert("Create failed");
+      }
+    },
+    [createModalTable, ordersSort],
+  );
 
   return (
     <div>
       <Navbar />
 
+      <AdminCreateModal
+        open={!!createModalTable}
+        tableName={createModalTable || ""}
+        tableLabel={createModalTable ? TABLES_NAMES[createModalTable] : ""}
+        columns={createModalTable ? schema[createModalTable] : []}
+        onClose={() => setCreateModalTable(null)}
+        onSubmit={handleCreateSubmit}
+      />
+
       <main className="m-5">
         {Object.keys(schema).length > 0 ? (
           Object.entries(schema).map(([tableName, tableColumns]) => {
+            const pk = primaryKeyFromColumns(tableColumns);
+            const visible = columnsForTableDisplay(tableName, tableColumns);
+            const defaultColumnSpecs = visible.map((c) => ({
+              accessorKey: c.sqlName,
+              header: c.humanReadableName,
+              meta: {
+                sqlType: c.sqlType,
+                columnKey: c.columnKey,
+                isNullable: c.isNullable,
+              },
+            }));
+
+            const useSortedOrders =
+              tableName === "orders" && ordersSort !== ORDERS_SORT_DEFAULT;
+            const columnSpecs = useSortedOrders
+              ? buildOrderViewColumnSpecs(
+                  schema.orders,
+                  ordersViewData?.[0] ?? null,
+                )
+              : defaultColumnSpecs;
+            const tableData =
+              tableName === "orders" && useSortedOrders
+                ? ordersSortLoading
+                  ? "LOADING"
+                  : Array.isArray(ordersViewData)
+                    ? ordersViewData
+                    : []
+                : data[tableName] ?? "LOADING";
+
             return (
               <div key={tableName}>
                 <div className="float-end">
@@ -284,57 +484,80 @@ export default function Admin() {
                     text="Reload"
                     size={0}
                     onClick={() => {
-                      getTablesData(
-                        [tableName],
-                        data,
-                        setData,
-                        rowStyles,
-                        setRowStyles,
-                        true,
-                      );
+                      if (
+                        tableName === "orders" &&
+                        ordersSort !== ORDERS_SORT_DEFAULT
+                      ) {
+                        setOrdersSortLoading(true);
+                        fetchOrdersSortedRows(ordersSort)
+                          .then((rows) => setOrdersViewData(rows))
+                          .catch((err) => {
+                            console.error(err);
+                            setOrdersViewData([]);
+                          })
+                          .finally(() => setOrdersSortLoading(false));
+                      } else {
+                        getTablesData(
+                          [tableName],
+                          setData,
+                          setRowStyles,
+                          true,
+                        );
+                      }
                     }}
                   />
                   &nbsp;
                   <Button
                     text="+"
                     size={0}
-                    onClick={() => {
-                      createEntity(
-                        tableName,
-                        schema,
-                        data,
-                        setData,
-                        rowStyles,
-                        setRowStyles,
-                      );
-                    }}
+                    onClick={() => setCreateModalTable(tableName)}
                   />
                 </div>
-                <h2 className="text-xl font-bold mb-3 ms-4">
-                  {TABLES_NAMES[tableName]}
+                <h2 className="mb-3 ms-4 text-xl font-bold">
+                  {TABLES_NAMES[tableName] ?? tableName}
                 </h2>
+                {tableName === "orders" ? (
+                  <div className="mb-3 ms-4 flex flex-wrap items-center gap-2">
+                    <label
+                      htmlFor="admin-orders-sort"
+                      className="text-sm font-medium text-neutral-700"
+                    >
+                      Sort orders by
+                    </label>
+                    <select
+                      id="admin-orders-sort"
+                      className="rounded-md border border-neutral-300 bg-white px-2 py-1.5 text-sm shadow-sm"
+                      value={ordersSort}
+                      onChange={(e) => setOrdersSort(e.target.value)}
+                    >
+                      <option value={ORDERS_SORT_DEFAULT}>
+                        Default
+                      </option>
+                      <option value="date_desc">
+                        Order date — newest first
+                      </option>
+                      <option value="date_asc">
+                        Order date — oldest first
+                      </option>
+                      <option value="customer">Customer name (A–Z)</option>
+                      <option value="amount_desc">
+                        Order total — high to low
+                      </option>
+                      <option value="amount_asc">
+                        Order total — low to high
+                      </option>
+                    </select>
+                  </div>
+                ) : null}
                 <AdminDataTable
-                  data={data[tableName] ?? "LOADING"}
-                  columns={tableColumns.map(
-                    ({ sqlName, humanReadableName, sqlType }) => {
-                      return {
-                        accessorKey: sqlName,
-                        header: humanReadableName,
-                      };
-                    },
-                  )}
+                  data={tableData}
+                  columnSpecs={columnSpecs}
+                  primaryKeyColumn={pk}
                   rowStyles={rowStyles[tableName] ?? {}}
-                  editHandler={() => {}}
-                  deleteHandler={(id) => {
-                    deleteRow(
-                      tableName,
-                      id,
-                      rowStyles,
-                      setRowStyles,
-                      data,
-                      setData,
-                    );
-                  }}
+                  onCellSave={(rowId, columnKey, oldV, newV) =>
+                    handleCellSave(tableName, rowId, columnKey, oldV, newV)
+                  }
+                  deleteHandler={(id) => handleDelete(tableName, id)}
                 />
 
                 <div className="h-5"></div>

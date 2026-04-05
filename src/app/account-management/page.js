@@ -1,25 +1,17 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import SectionCard from "../components/SectionCard";
+import RequireAuth from "../components/RequireAuth";
 
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "@/context/AuthContext";
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
 
-
-export default function AccountManagement() {
-  const router = useRouter();
-  const { user, setUser, logout } = useAuth();
-  useEffect(() => {
-    if (user === null) {
-      // not logged in
-      router.push("/sign-in"); // redirects to login page
-    }
-  }, [user]);
+function AccountManagementContent() {
+  const { user } = useAuth();
   const [openSection, setOpenSection] = useState("personal");
 
   const [formData, setFormData] = useState({
@@ -191,8 +183,7 @@ export default function AccountManagement() {
             )}
           </div>
 
-          {user !== undefined ? (
-            <div className="flex flex-col gap-5">
+          <div className="flex flex-col gap-5">
               <SectionCard
                 title="Personal Information"
                 isOpen={openSection === "personal"}
@@ -370,16 +361,19 @@ export default function AccountManagement() {
                   </button>
                 </form>
               </SectionCard>
-            </div>
-          ) : (
-            <div className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3">
-              Loading…
-            </div>
-          )}
+          </div>
         </div>
       </div>
 
       <Footer />
     </div>
+  );
+}
+
+export default function AccountManagement() {
+  return (
+    <RequireAuth>
+      <AccountManagementContent />
+    </RequireAuth>
   );
 }

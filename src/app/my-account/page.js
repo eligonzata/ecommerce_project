@@ -1,27 +1,30 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import SectionCard from "../components/SectionCard";
+import RequireAuth from "../components/RequireAuth";
 
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "@/context/AuthContext";
 import Button from "../components/Button";
 import Link from "next/link";
 
-export default function MyAccountAndOrders() {
-  const router = useRouter();
+function MyAccountContent() {
   const { user, logout } = useAuth();
-  useEffect(() => {
-    if (user === null) {
-      // not logged in
-      router.push("/sign-in"); // redirects to login page
-    }
-  }, [user]);
+  const isAdmin =
+    user != null && String(user.role || "").toLowerCase() === "admin";
 
-  const [openSection, setOpenSection] = useState("orders");
+  const [openSection, setOpenSection] = useState(() =>
+    isAdmin ? "account" : "orders",
+  );
+
+  useEffect(() => {
+    if (isAdmin) {
+      setOpenSection((prev) => (prev === "orders" ? "account" : prev));
+    }
+  }, [isAdmin]);
 
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -43,7 +46,9 @@ export default function MyAccountAndOrders() {
               {user ? `Welcome, ${user.name}` : "My Account"}
             </h1>
             <p className="mt-2 text-gray-600">
-              Manage your orders and account details.
+              {isAdmin
+                ? "Manage your account details."
+                : "Manage your orders and account details."}
             </p>
           </div>
 
@@ -61,37 +66,41 @@ export default function MyAccountAndOrders() {
             )}
           </div>
 
-          {user !== undefined ? (
-            <div className="flex flex-col gap-5">
+          <div className="flex flex-col gap-5">
+            {!isAdmin ? (
               <SectionCard
                 title="Orders"
                 isOpen={openSection === "orders"}
                 onToggle={() => toggleSection("orders")}
               ></SectionCard>
-              <SectionCard
-                title="Account"
-                isOpen={openSection === "account"}
-                onToggle={() => toggleSection("account")}
-              >
-                <div className="my-3">
-                  <Link href="/account-management">
-                    <Button text="Manage Account"></Button>
-                  </Link>
-                </div>
-                <div className="my-3">
-                  <Button text="Log Out" onClick={logout}></Button>
-                </div>
-              </SectionCard>
-            </div>
-          ) : (
-            <div className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3">
-              Loading…
-            </div>
-          )}
+            ) : null}
+            <SectionCard
+              title="Account"
+              isOpen={openSection === "account"}
+              onToggle={() => toggleSection("account")}
+            >
+              <div className="my-3">
+                <Link href="/account-management">
+                  <Button text="Manage Account"></Button>
+                </Link>
+              </div>
+              <div className="my-3">
+                <Button text="Log Out" onClick={logout}></Button>
+              </div>
+            </SectionCard>
+          </div>
         </div>
       </div>
 
       <Footer />
     </div>
+  );
+}
+
+export default function MyAccountAndOrders() {
+  return (
+    <RequireAuth>
+      <MyAccountContent />
+    </RequireAuth>
   );
 }

@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
-import { useAuth } from "src/context/AuthContext";
+import { useAuth } from "@/context/AuthContext";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
 
@@ -19,11 +19,12 @@ export default function ProductPage() {
   const [addingToCart, setAddingToCart] = useState(false);
   const { user } = useAuth();
   useEffect(() => {
-    console.log(user);
     if (user?.id) {
       setUserId(user.id);
+    } else {
+      setUserId(null);
     }
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     if (!params?.id) return;
@@ -45,7 +46,8 @@ export default function ProductPage() {
 
   async function addToCart() {
     if (!userId) {
-      router.push("./sign-in");
+      const next = encodeURIComponent(`/products/${params.id}`);
+      router.push(`/sign-in?next=${next}`);
       return;
     }
 

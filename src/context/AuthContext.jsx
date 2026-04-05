@@ -1,11 +1,17 @@
-// context/AuthContext.js
-import React, { createContext, useContext, ReactNode, useEffect } from "react";
+// context/AuthContext.jsx
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useCallback,
+  useState,
+} from "react";
 import { useLocalStorage } from "../app/hooks/useLocalStorage";
 
 const AuthContext = createContext(undefined);
 
 function userDataMatchesExpectedSchema(user) {
-  if (user === undefined) {
+  if (user === null || user === undefined) {
     return true;
   }
   if (!user?.id || !user?.email || !user?.name || !user?.role) {
@@ -15,35 +21,37 @@ function userDataMatchesExpectedSchema(user) {
 }
 
 export const AuthProvider = ({ children }) => {
-  // Initialize 'user' state using the custom hook
-  // It automatically tries to load the value from localStorage['user']
   const [user, setUser] = useLocalStorage("user", null);
+  const [hasHydrated, setHasHydrated] = useState(false);
 
   useEffect(() => {
-    // validates the user object, logs out if corrupted
+    setHasHydrated(true);
+  }, []);
+
+  const login = useCallback((userData) => {
+    setUser(userData);
+  }, [setUser]);
+
+  const logout = useCallback(() => {
+    setUser(null);
+    if (typeof window !== "undefined") {
+      localStorage.clear();
+    }
+  }, [setUser]);
+
+  useEffect(() => {
+    if (!hasHydrated) return;
     if (!userDataMatchesExpectedSchema(user)) {
       logout();
     }
-  }, [user]);
+  }, [user, hasHydrated, logout]);
 
-  // Function to handle login (sets user in context and localStorage)
-  const login = (userData) => {
-    // Perform actual authentication (e.g., API call) here
-    // On success, set the user data
-    setUser(userData);
-  };
-
-  // Function to handle logout (clears user from context and localStorage)
-  const logout = () => {
-    setUser(null);
-    localStorage.clear(); // Optional: clear all local storage on logout
-  };
-
-  // The value provided to all children components
   const contextValue = {
     user,
+    setUser,
     login,
     logout,
+    hasHydrated,
   };
 
   return (
@@ -51,7 +59,6 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-// Custom hook to easily consume the AuthContext in functional components
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {

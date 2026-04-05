@@ -82,8 +82,8 @@ export default function Forgot() {
           </form>
 
           <div className="mt-6 text-center text-sm">
-            <Link href="/account" className="text-[#641414] hover:underline">
-              Back to Login
+            <Link href="/sign-in" className="text-[#641414] hover:underline">
+              Back to sign in
             </Link>
           </div>
         </div>

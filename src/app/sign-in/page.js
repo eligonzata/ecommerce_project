@@ -7,8 +7,22 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 
+/** Only allow same-origin paths; blocks open redirects. */
+function getSafeNextPath(raw) {
+  if (!raw || typeof raw !== "string") return null;
+  let path;
+  try {
+    path = decodeURIComponent(raw.trim());
+  } catch {
+    return null;
+  }
+  if (!path.startsWith("/") || path.startsWith("//")) return null;
+  if (path.includes("://")) return null;
+  return path;
+}
+
 export default function Account() {
-  const { user, login, logout } = useAuth();
+  const { login } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -43,10 +57,19 @@ export default function Account() {
         role: user.user_role,
       };
       login(localStorageUserData);
-      if(user.user_role==="customer"){
-          setTimeout(() => router.push("/"), 1000);
-      }else{
-          setTimeout(() => router.push("/admin"), 1000);
+
+      const params =
+        typeof window !== "undefined"
+          ? new URLSearchParams(window.location.search)
+          : null;
+      const nextPath = params ? getSafeNextPath(params.get("next")) : null;
+
+      if (nextPath) {
+        setTimeout(() => router.push(nextPath), 1000);
+      } else if (user.user_role === "customer") {
+        setTimeout(() => router.push("/"), 1000);
+      } else {
+        setTimeout(() => router.push("/admin"), 1000);
       }
       
     } catch (err) {

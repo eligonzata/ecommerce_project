@@ -6,29 +6,21 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useAuth } from "src/context/AuthContext";
+import { useAuth } from "@/context/AuthContext";
+import RequireAuth from "../components/RequireAuth";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
 
-function Cart() {
+function CartContent() {
   const [cartItems, setCartItems] = useState([]);
   const [checkoutMessage, setCheckoutMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [discountCode, setDiscountCode] = useState("");
   const [discount, setDiscount] = useState(null);
-  const [userId, setUserId] = useState(null);
   const router = useRouter();
   const { user } = useAuth();
-
-  useEffect(() => {
-    
-    if (user?.id) {
-      setUserId(user.id);
-    } else {
-      router.push("/sign-in");
-    }
-  }, []);
+  const userId = user.id;
 
   useEffect(() => {
     if (!userId) return;
@@ -351,4 +343,10 @@ function Cart() {
   );
 }
 
-export default Cart;
+export default function Cart() {
+  return (
+    <RequireAuth>
+      <CartContent />
+    </RequireAuth>
+  );
+}
