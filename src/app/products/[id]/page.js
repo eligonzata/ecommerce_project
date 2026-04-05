@@ -7,7 +7,7 @@ import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import { useAuth } from "src/context/AuthContext";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "/api";
 
 export default function ProductPage() {
   const params = useParams();
@@ -23,7 +23,7 @@ export default function ProductPage() {
     if (user?.id) {
       setUserId(user.id);
     }
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     if (!params?.id) return;

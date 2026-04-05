@@ -8,7 +8,7 @@ import Footer from "../components/Footer";
 import SectionCard from "../components/SectionCard";
 
 import { useAuth } from "../../context/AuthContext";
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "/api";
 
 
 export default function AccountManagement() {

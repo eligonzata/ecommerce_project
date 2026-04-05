@@ -8,8 +8,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "src/context/AuthContext";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
-
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "/api";
 function Cart() {
   const [cartItems, setCartItems] = useState([]);
   const [checkoutMessage, setCheckoutMessage] = useState("");
@@ -28,7 +27,7 @@ function Cart() {
     } else {
       router.push("/sign-in");
     }
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     if (!userId) return;
