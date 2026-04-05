@@ -5,7 +5,7 @@ import ProductList from "../components/ProductList";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 
-const API_URL = "http://localhost:5001";
+const API_URL = "/api";
 
 export default function Shop() {
   const [products, setProducts] = useState([]);
