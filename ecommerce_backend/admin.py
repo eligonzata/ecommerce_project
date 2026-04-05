@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from datetime import date, datetime
 from decimal import Decimal, InvalidOperation
 
@@ -28,6 +29,48 @@ ADMIN_WRITE_BLOCKED_COLUMNS = {
 }
 
 # --- helpers ---
+
+
+def _parse_enum_values(column_type: str | None) -> list[str] | None:
+    """Parse MySQL COLUMN_TYPE like enum('a','b') into ['a', 'b']."""
+    if not column_type:
+        return None
+    ct = column_type.strip()
+    m = re.match(r"^enum\s*\((.*)\)\s*$", ct, re.IGNORECASE | re.DOTALL)
+    if not m:
+        return None
+    inner = m.group(1).strip()
+    if not inner:
+        return None
+    values: list[str] = []
+    i = 0
+    n = len(inner)
+    while i < n:
+        while i < n and inner[i] in " \t\n\r,":
+            i += 1
+        if i >= n:
+            break
+        if inner[i] != "'":
+            return None
+        i += 1
+        chunk: list[str] = []
+        while i < n:
+            c = inner[i]
+            if c == "\\" and i + 1 < n:
+                chunk.append(inner[i + 1])
+                i += 2
+                continue
+            if c == "'":
+                if i + 1 < n and inner[i + 1] == "'":
+                    chunk.append("'")
+                    i += 2
+                    continue
+                i += 1
+                break
+            chunk.append(c)
+            i += 1
+        values.append("".join(chunk))
+    return values if values else None
 
 
 def _table_allowed(table_name: str) -> None:
@@ -218,7 +261,8 @@ def get_schema():
     for table_name in requested_tables:
         cursor.execute(
             """
-            SELECT COLUMN_NAME, DATA_TYPE, COLUMN_KEY, EXTRA, IS_NULLABLE
+            SELECT COLUMN_NAME, DATA_TYPE, COLUMN_TYPE, COLUMN_KEY, EXTRA,
+                   IS_NULLABLE
             FROM information_schema.columns
             WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = %s
             ORDER BY ORDINAL_POSITION
@@ -227,16 +271,21 @@ def get_schema():
         )
         result = cursor.fetchall()
         # Include all columns (e.g. users.password) for forms; row data still omits secrets in GET multi-table-data.
-        schemas[table_name] = [
-            {
+        built: list[dict] = []
+        for row in result:
+            col_type = row.get("COLUMN_TYPE") or ""
+            enum_vals = _parse_enum_values(col_type)
+            entry = {
                 "sqlName": row["COLUMN_NAME"],
                 "sqlType": row["DATA_TYPE"],
                 "columnKey": row["COLUMN_KEY"] or "",
                 "extra": row["EXTRA"] or "",
                 "isNullable": row["IS_NULLABLE"] == "YES",
             }
-            for row in result
-        ]
+            if enum_vals is not None:
+                entry["enumValues"] = enum_vals
+            built.append(entry)
+        schemas[table_name] = built
 
     cursor.close()
     conn.close()

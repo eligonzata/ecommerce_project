@@ -8,6 +8,9 @@ function isAutoIncrement(col) {
 }
 
 function fieldWidgetType(col) {
+  if (Array.isArray(col.enumValues) && col.enumValues.length > 0) {
+    return "enum";
+  }
   if (col.sqlName === "password") return "password";
   const t = (col.sqlType || "").toLowerCase();
   if (["int", "bigint", "smallint", "mediumint", "integer"].includes(t))
@@ -45,7 +48,14 @@ export default function AdminCreateModal({
     const init = {};
     for (const col of fields) {
       const w = fieldWidgetType(col);
-      init[col.sqlName] = w === "checkbox" ? false : "";
+      if (w === "enum") {
+        const opts = col.enumValues || [];
+        init[col.sqlName] = col.isNullable ? "" : opts[0] ?? "";
+      } else if (w === "checkbox") {
+        init[col.sqlName] = false;
+      } else {
+        init[col.sqlName] = "";
+      }
     }
     setValues(init);
     setError("");
@@ -66,6 +76,21 @@ export default function AdminCreateModal({
       const raw = values[col.sqlName];
       if (w === "checkbox") {
         payload[col.sqlName] = raw ? 1 : 0;
+        continue;
+      }
+      if (w === "enum") {
+        if (raw === "" || raw === undefined || raw === null) {
+          if (!col.isNullable) {
+            setError(`"${col.humanReadableName || col.sqlName}" is required.`);
+            return;
+          }
+          continue;
+        }
+        if (!col.enumValues.includes(raw)) {
+          setError(`Invalid choice for ${col.humanReadableName || col.sqlName}.`);
+          return;
+        }
+        payload[col.sqlName] = raw;
         continue;
       }
       if (raw === "" || raw === undefined || raw === null) {
@@ -110,6 +135,10 @@ export default function AdminCreateModal({
           {fields.map((col) => {
             const w = fieldWidgetType(col);
             const id = `create-${tableName}-${col.sqlName}`;
+            const typeHint =
+              w === "enum"
+                ? `enum (${col.enumValues?.length ?? 0} options)`
+                : col.sqlType;
             return (
               <div key={col.sqlName}>
                 <label
@@ -118,7 +147,7 @@ export default function AdminCreateModal({
                 >
                   {col.humanReadableName || col.sqlName}
                   <span className="ml-1 text-xs font-normal text-neutral-500">
-                    ({col.sqlType}
+                    ({typeHint}
                     {col.isNullable ? ", optional" : ""})
                   </span>
                 </label>
@@ -130,6 +159,22 @@ export default function AdminCreateModal({
                     checked={!!values[col.sqlName]}
                     onChange={(e) => setField(col.sqlName, e.target.checked)}
                   />
+                ) : w === "enum" ? (
+                  <select
+                    id={id}
+                    className="w-full rounded-lg border border-amber-200 bg-white px-3 py-2 text-sm"
+                    value={values[col.sqlName] ?? ""}
+                    onChange={(e) => setField(col.sqlName, e.target.value)}
+                  >
+                    {col.isNullable ? (
+                      <option value="">— Select —</option>
+                    ) : null}
+                    {(col.enumValues || []).map((opt) => (
+                      <option key={opt} value={opt}>
+                        {opt}
+                      </option>
+                    ))}
+                  </select>
                 ) : (
                   <input
                     id={id}
@@ -137,7 +182,9 @@ export default function AdminCreateModal({
                     className="w-full rounded-lg border border-amber-200 bg-white px-3 py-2 text-sm"
                     value={values[col.sqlName] ?? ""}
                     onChange={(e) => setField(col.sqlName, e.target.value)}
-                    autoComplete={col.sqlName === "password" ? "new-password" : "off"}
+                    autoComplete={
+                      col.sqlName === "password" ? "new-password" : "off"
+                    }
                   />
                 )}
               </div>
