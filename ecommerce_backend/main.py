@@ -560,7 +560,25 @@ def update_order_status(order_id):
         return jsonify({"message": f"Order status updated to '{status}'"})
     return jsonify({"error": "Order not found"}), 404
 
+@app.route("/orders/order/<int:order_id>", methods=["GET"])
+def get_single_order(order_id):
+    conn = get_db()
+    if not conn:
+        return jsonify({"error": "Database connection failed"}), 500
 
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute(
+        "SELECT * FROM v_order_summary WHERE order_id = %s",
+        (order_id,)
+    )
+    order = cursor.fetchone()
+
+    cursor.close()
+    conn.close()
+
+    if order:
+        return jsonify(order)
+    return jsonify({"error": "Order not found"}), 404
 # DISCOUNT CODES
 
 

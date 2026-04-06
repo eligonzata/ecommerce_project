@@ -148,12 +148,12 @@ function CartContent() {
       if (!response.ok) throw new Error("Failed to create order");
 
       const data = await response.json();
-      setCheckoutMessage("Thank you for shopping with us!! 🎉");
+      //setCheckoutMessage("Thank you for shopping with us!! 🎉");
       setCartItems([]);
 
-      setTimeout(() => {
-        router.push(`/`);
-      }, 2000);
+    
+      router.push(`/order-summary/${data.order_id}`);
+     
     } catch (err) {
       console.error("Checkout failed:", err);
       setError("Checkout failed. Please try again.");
