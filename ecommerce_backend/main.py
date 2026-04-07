@@ -5,17 +5,17 @@ from . import app, get_db
 
 from datetime import datetime
 
-
+#not used
 @app.route("/", methods=["GET"])
 def home():
     return jsonify({"message": "Flame Keepers API is running!"})
 
-
+#not used 
 @app.route("/test", methods=["GET"])
 def test():
     return jsonify({"message": "API is working!"})
 
-
+#not used 
 @app.route("/health", methods=["GET"])
 def health_check():
     try:
@@ -32,7 +32,7 @@ def health_check():
 # PRODUCTS
 
 #modified this so that whenever filters are applied they are stacked on eachother
-#used in shop/page.js
+#used in shop/page.js,ProductList.js, and home page
 @app.route("/products", methods=["GET"])
 def get_products():
     tag = request.args.get("tag")
@@ -67,7 +67,8 @@ def get_products():
     conn.close()
     return jsonify(products)
 
-#not sure if this is used
+#not used
+#could be used later for "sale" page
 @app.route("/products/sale", methods=["GET"])
 def get_sale_products():
     conn = get_db()
@@ -82,6 +83,7 @@ def get_sale_products():
     conn.close()
     return jsonify(products)
 
+# not used
 @app.route("/products/search", methods=["GET"])
 def search_products():
     """Usage: GET /products/search?q=lavender"""
@@ -102,9 +104,10 @@ def search_products():
     return jsonify(products)
 
 
-#removed products/sort app route because it is now handled in products
+# removed products/sort app route because it is now handled in products
 
-#this is used in products/[id]/page.js
+# used in products/[id]/page.js
+# Fetches individual product details for product page
 @app.route("/products/<int:product_id>", methods=["GET"])
 def get_product(product_id):
     conn = get_db()
@@ -128,8 +131,8 @@ def get_product(product_id):
         return jsonify({"error": "Product not found"}), 404
 
 
-# this is for the home page tagged products section
-#used in app/page.js (index)
+# used in app/page.js (home page)
+# displays featured/tagged products on homepage
 @app.route("/products/tagged", methods=["GET"])
 def get_products_by_tag():
     tag = request.args.get("tag")
@@ -167,8 +170,8 @@ def get_products_by_tag():
     return jsonify(products)
 
 
-# this one is used for the tag filtering on the products page
-#not sure if this is necessary but is used in shop/page.js
+#used in shop/page.js
+# gives tag filter options for product filtering UI
 @app.route("/tags", methods=["GET"])
 def get_tags():
     conn = get_db()
@@ -195,7 +198,7 @@ def get_tags():
 
 # USERS
 
-
+#used in admin/page.js
 @app.route("/users", methods=["GET"])
 def get_users():
     email = request.args.get("email")
@@ -217,6 +220,8 @@ def get_users():
     return jsonify(users)
 
 
+#used in register/page.js
+#user account creation
 @app.route("/users", methods=["POST"])
 def register_user():
     """Body: { first_name, last_name, email, password, phone }"""
@@ -237,7 +242,7 @@ def register_user():
                 data["first_name"],
                 data["last_name"],
                 data["email"],
-                bcrypt.hashpw(data["password"].encode("utf-8"),bcrypt.gensalt()).decode("utf-8"), #added so users passwords are hashed
+                bcrypt.hashpw(data["password"].encode("utf-8"),bcrypt.gensalt()).decode("utf-8"),
                 data.get("phone"),
             ),
         )
@@ -251,7 +256,10 @@ def register_user():
     conn.close()
     return jsonify({"message": "User registered successfully", "user_id": new_id}), 201
 
-@app.route("/login", methods=["POST"]) # new login route that checks the email and password against the database
+
+#used in sign-in/page.js
+#authenticates users 
+@app.route("/login", methods=["POST"])
 def login():
     """Body: { email, password }"""
     data = request.get_json()
@@ -282,6 +290,8 @@ def login():
     else:
         return jsonify({"error": "Invalid email or password"}), 401
  
+
+# used within account-management/page.js
 @app.route("/users/<int:user_id>", methods=["GET"])
 def get_user(user_id):
     conn = get_db()
@@ -302,7 +312,9 @@ def get_user(user_id):
         return jsonify(user)
     return jsonify({"error": "User not found"}), 404
 
-@app.route("/users/<int:user_id>/password", methods=["PUT"]) #allows users to update their password used in account management/page.js
+
+#used in account-management/page.js
+@app.route("/users/<int:user_id>/password", methods=["PUT"])
 def update_password(user_id):
     """Body: { current_password, new_password }"""
     data = request.get_json()
@@ -334,7 +346,7 @@ def update_password(user_id):
     conn.close()
     return jsonify({"message": "Password updated successfully"})
  
-#pused in account_management/page.js
+#used in account_management/page.js
 @app.route("/users/<int:user_id>", methods=["PUT"])
 def update_user(user_id):
     """Body (any combination): { first_name, last_name, phone, email }"""
@@ -362,7 +374,7 @@ def update_user(user_id):
         return jsonify({"message": "User updated successfully"})
     return jsonify({"error": "User not found"}), 404
 
-
+#used in account-management/page.js
 @app.route("/users/<int:user_id>", methods=["DELETE"])
 def delete_account(user_id):
     conn = get_db()
@@ -378,7 +390,8 @@ def delete_account(user_id):
 
 # CART
 
-
+#used in cart/page.js
+#gets the user's cart items
 @app.route("/cart/<int:user_id>", methods=["GET"])
 def get_cart(user_id):
     conn = get_db()
@@ -392,6 +405,8 @@ def get_cart(user_id):
     return jsonify(items)
 
 
+#used in cart/page.js
+#adds product to the cart
 @app.route("/cart", methods=["POST"])
 def add_to_cart():
     """Body: { user_id, product_id, quantity }"""
@@ -413,6 +428,7 @@ def add_to_cart():
     return jsonify({"message": "Cart updated successfully"}), 201
 
 
+#usedin cart/page.js
 @app.route("/cart/<int:user_id>/<int:product_id>", methods=["PUT"])
 def update_cart_item(user_id, product_id):
     """Body: { quantity }"""
@@ -439,6 +455,8 @@ def update_cart_item(user_id, product_id):
     return jsonify({"error": "Cart item not found"}), 404
 
 
+#used in cart/page.js
+#removes said item
 @app.route("/cart/<int:user_id>/<int:product_id>", methods=["DELETE"])
 def remove_from_cart(user_id, product_id):
     conn = get_db()
@@ -458,6 +476,8 @@ def remove_from_cart(user_id, product_id):
     return jsonify({"error": "Cart item not found"}), 404
 
 
+#used in cart/page.js
+#clears cart when needed
 @app.route("/cart/<int:user_id>", methods=["DELETE"])
 def clear_cart(user_id):
     conn = get_db()
@@ -473,7 +493,7 @@ def clear_cart(user_id):
 
 # ORDERS
 
-
+#used in orders/page.js
 @app.route("/orders/<int:user_id>", methods=["GET"])
 def get_user_orders(user_id):
     conn = get_db()
@@ -490,6 +510,8 @@ def get_user_orders(user_id):
     return jsonify(orders)
 
 
+#used in orders/page.js
+#gets the items for a specific order
 @app.route("/orders/<int:order_id>/items", methods=["GET"])
 def get_order_items(order_id):
     conn = get_db()
@@ -534,6 +556,7 @@ def create_order():
     )
 
 
+#used in admin/orders/page.js
 @app.route("/orders/<int:order_id>/status", methods=["PUT"])
 def update_order_status(order_id):
     """Body: { order_status }  (pending | processing | shipped | delivered | cancelled)"""
@@ -560,6 +583,7 @@ def update_order_status(order_id):
         return jsonify({"message": f"Order status updated to '{status}'"})
     return jsonify({"error": "Order not found"}), 404
 
+#used in orders/page.js
 @app.route("/orders/order/<int:order_id>", methods=["GET"])
 def get_single_order(order_id):
     conn = get_db()
@@ -572,23 +596,23 @@ def get_single_order(order_id):
         (order_id,)
     )
     order = cursor.fetchone()
-
     cursor.close()
     conn.close()
-
     if order:
         return jsonify(order)
     return jsonify({"error": "Order not found"}), 404
+
+
 # DISCOUNT CODES
 
-
+#used in cart/page.js
+#discount count validation
 @app.route("/discounts/validate", methods=["POST"])
 def validate_discount():
     """Body: { code, cart_total }
-
     On success: increments discount_codes.times_used once (redemption counted at apply time).
-    Checkout must not increment again — see sp_create_order_from_cart.
-    """
+    Checkout must not increment again — see sp_create_order_from_cart."""
+
     data = request.get_json()
     code = data.get("code")
     cart_total = data.get("cart_total", 0)
@@ -610,6 +634,8 @@ def validate_discount():
         (code,),
     )
     discount = cursor.fetchone()
+    cursor.close()
+    conn.close()
 
     if not discount:
         cursor.close()
@@ -667,15 +693,15 @@ def validate_discount():
         cursor.close()
         conn.close()
         return jsonify({"valid": False, "error": "Could not apply discount code"}), 500
-
     cursor.close()
     conn.close()
+
     return jsonify({"valid": True, "discount": discount})
 
 
 # ADMIN ROUTES
 
-
+#used in admin/orders/page.js
 @app.route("/admin/orders", methods=["GET"])
 def admin_get_orders():
     """Usage: GET /admin/orders?sort_by=date|customer|amount&order=DESC"""
@@ -705,6 +731,8 @@ def admin_get_orders():
     return jsonify(orders)
 
 
+#used in admin/users/page.js
+#gets users for the admin's dashboard
 @app.route("/admin/users", methods=["GET"])
 def admin_get_users():
     conn = get_db()
@@ -722,6 +750,8 @@ def admin_get_users():
     return jsonify(users)
 
 
+#used in admin/discounts/page.js
+# retrieve the codes
 @app.route("/admin/discounts", methods=["GET"])
 def admin_get_discounts():
     conn = get_db()
@@ -735,6 +765,9 @@ def admin_get_discounts():
     return jsonify(codes)
 
 
+# used in admin/discounts/page.js
+#discount code creation
+# Could be used in future for promotional campaigns
 @app.route("/admin/discounts", methods=["POST"])
 def admin_create_discount():
     """Body: { code, description, discount_type, discount_value,
@@ -761,7 +794,8 @@ def admin_create_discount():
                 end_date_val = datetime.fromisoformat(s)
             except ValueError:
                 return jsonify({"error": "Invalid end_date"}), 400
-
+    
+    
     cursor = conn.cursor()
     try:
         cursor.execute(
@@ -790,5 +824,6 @@ def admin_create_discount():
     return jsonify({"message": "Discount code created", "discount_id": new_id}), 201
 
 
+#main entry point/start the application
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=5001)
