@@ -86,7 +86,7 @@ async function fetchProducts() {
               setAvailabilityFilter(value);
               fetchProducts(selectedTag, value, priceSort);
             }}
-            className="w-full p-2 border border-gray-300 rounded"
+            className="w-full max-w-md p-2 border border-gray-300 rounded mb-4"
           >
             <option value="all">Availability</option>
             <option value="in-stock">In Stock</option>
@@ -100,7 +100,7 @@ async function fetchProducts() {
               setPriceSort(value);
               fetchProducts(selectedTag, availabilityFilter, value);
             }}
-            className="w-full p-2 border border-gray-300 rounded"
+            className="w-full max-w-md p-2 border border-gray-300 rounded mb-4"
             >
               <option value="default">Default Price Order</option>
               <option value="price-asc">Price: Low → High</option>
