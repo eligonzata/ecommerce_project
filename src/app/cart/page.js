@@ -21,6 +21,13 @@ function CartContent() {
   const router = useRouter();
   const { user } = useAuth();
   const userId = user.id;
+  const [showPayment, setShowPayment] = useState(false);
+  const [payment, setPayment] = useState({
+    cardName: "",
+    cardNumber: "",
+    expiration: "",
+    cvv: "",
+  });
 
   useEffect(() => {
     if (!userId) return;
@@ -134,6 +141,12 @@ function CartContent() {
       return;
     }
 
+      const paymentError = validatePayment();
+        if (paymentError) {
+          setError(paymentError);
+          return;
+        }
+
     try {
       const response = await fetch(`${API_URL}/orders`, {
         method: "POST",
@@ -142,6 +155,11 @@ function CartContent() {
           user_id: userId,
           payment_method: "Credit Card",
           discount_code: discount?.code || "",
+          payment_info: {
+            card_name: payment.cardName,
+            card_last4: payment.cardNumber.slice(-4),
+            expiration: payment.expiration,
+          },
         }),
       });
 
@@ -151,9 +169,7 @@ function CartContent() {
       //setCheckoutMessage("Thank you for shopping with us!! 🎉");
       setCartItems([]);
 
-    
       router.push(`/order-summary/${data.order_id}`);
-     
     } catch (err) {
       console.error("Checkout failed:", err);
       setError("Checkout failed. Please try again.");
@@ -161,6 +177,57 @@ function CartContent() {
   };
 
   const isEmpty = cartItems.length === 0;
+
+  function handlePaymentChange(e) {
+    const { name, value } = e.target;
+
+    if (name === "cardNumber") {
+      const digits = value.replace(/\D/g, "").slice(0, 16);
+      setPayment((prev) => ({ ...prev, [name]: digits }));
+      return;
+    }
+
+    if (name === "cvv") {
+      const digits = value.replace(/\D/g, "").slice(0, 4);
+      setPayment((prev) => ({ ...prev, [name]: digits }));
+      return;
+    }
+
+    if (name === "expiration") {
+      let cleaned = value.replace(/\D/g, "").slice(0, 4);
+      if (cleaned.length > 2) {
+        cleaned = `${cleaned.slice(0, 2)}/${cleaned.slice(2)}`;
+      }
+      setPayment((prev) => ({ ...prev, [name]: cleaned }));
+      return;
+    }
+
+    setPayment((prev) => ({ ...prev, [name]: value }));
+  }
+
+  function validatePayment() {
+    if (!showPayment) {
+      return "Please open the payment section and enter your payment information.";
+    }
+
+    if (!payment.cardName.trim()) {
+      return "Please enter the name on the card.";
+    }
+
+    if (payment.cardNumber.length !== 16) {
+      return "Please enter a valid 16-digit card number.";
+    }
+
+    if (!/^\d{2}\/\d{2}$/.test(payment.expiration)) {
+      return "Please enter a valid expiration date in MM/YY format.";
+    }
+
+    if (payment.cvv.length < 3) {
+      return "Please enter a valid CVV.";
+    }
+
+    return "";
+  }
 
   return (
     <div className="cart-container bg-gray-100 py-0 min-h-screen">
@@ -226,7 +293,7 @@ function CartContent() {
                           {item.product_name}
                         </h3>
                         <span className="text-sm text-gray-500">
-                          Price: ${item.price} 
+                          Price: ${item.price}
                         </span>
                       </div>
                     </div>
@@ -314,6 +381,55 @@ function CartContent() {
                     <span>${calculateTotal().toFixed(2)}</span>
                   </div>
                 </div>
+                {/* Payment Section Toggle */}
+                <button
+                  onClick={() => setShowPayment(!showPayment)}
+                  className="w-full mt-4 mb-4 text-left font-semibold text-[#641414]"
+                >
+                  {showPayment ? "Hide Payment Info −" : "Enter Payment Info +"}
+                </button>
+
+                {showPayment && (
+                  <div className="bg-gray-50 p-4 rounded-lg border mb-6">
+                    <h3 className="text-lg font-semibold mb-3">Payment Information</h3>
+
+                    <div className="flex flex-col gap-3">
+                      <input
+                        name="cardName"
+                        placeholder="Name on Card"
+                        value={payment.cardName}
+                        onChange={handlePaymentChange}
+                        className="p-2 border rounded"
+                      />
+
+                      <input
+                        name="cardNumber"
+                        placeholder="Card Number"
+                        value={payment.cardNumber}
+                        onChange={handlePaymentChange}
+                        className="p-2 border rounded"
+                      />
+
+                      <div className="flex gap-3">
+                        <input
+                          name="expiration"
+                          placeholder="MM/YY"
+                          value={payment.expiration}
+                          onChange={handlePaymentChange}
+                          className="p-2 border rounded w-1/2"
+                        />
+
+                        <input
+                          name="cvv"
+                          placeholder="CVV"
+                          value={payment.cvv}
+                          onChange={handlePaymentChange}
+                          className="p-2 border rounded w-1/2"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 <div className="flex flex-col sm:flex-row justify-center gap-4 mt-6">
                   <button
