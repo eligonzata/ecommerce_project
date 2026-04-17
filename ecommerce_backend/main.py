@@ -634,20 +634,14 @@ def validate_discount():
         (code,),
     )
     discount = cursor.fetchone()
-    cursor.close()
-    conn.close()
 
     if not discount:
-        cursor.close()
-        conn.close()
         return (
             jsonify({"valid": False, "error": "Invalid or expired discount code"}),
             404,
         )
 
     if cart_total < float(discount["min_purchase_amount"]):
-        cursor.close()
-        conn.close()
         return (
             jsonify(
                 {
@@ -674,9 +668,6 @@ def validate_discount():
         )
         if upd.rowcount != 1:
             conn.rollback()
-            upd.close()
-            cursor.close()
-            conn.close()
             return (
                 jsonify(
                     {
@@ -687,14 +678,12 @@ def validate_discount():
                 409,
             )
         conn.commit()
-        upd.close()
     except mysql.connector.Error:
         conn.rollback()
-        cursor.close()
-        conn.close()
         return jsonify({"valid": False, "error": "Could not apply discount code"}), 500
     cursor.close()
     conn.close()
+    upd.close()
 
     return jsonify({"valid": True, "discount": discount})
 
