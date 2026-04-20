@@ -48,6 +48,7 @@ const TABLES_NAMES = {
 };
 
 const ORDERS_SORT_DEFAULT = "default";
+const DEFAULT_PRODUCT_IMAGE_PATH = "/img/logo.png";
 
 /** Column order when sorted API returns no rows (matches v_admin_orders). */
 const ORDERS_VIEW_COLUMNS_FALLBACK = [
@@ -158,6 +159,19 @@ function coerceValueForApi(raw, sqlType, sqlName, isNullable) {
     return raw;
   }
   return raw;
+}
+
+function isValidImageUrl(value) {
+  if (typeof value !== "string") return false;
+  const trimmed = value.trim();
+  if (!trimmed) return false;
+  if (trimmed.startsWith("/")) return true;
+  try {
+    const parsed = new URL(trimmed);
+    return parsed.protocol === "http:" || parsed.protocol === "https:";
+  } catch {
+    return false;
+  }
 }
 
 async function getTablesSchemas(sqlTablesNames, setSchema) {
@@ -396,11 +410,18 @@ export default function Admin() {
     async (payload) => {
       if (!createModalTable) return;
       const tableName = createModalTable;
+      const nextPayload = { ...payload };
+      if (
+        tableName === "products" &&
+        !isValidImageUrl(nextPayload.image_url)
+      ) {
+        nextPayload.image_url = DEFAULT_PRODUCT_IMAGE_PATH;
+      }
       try {
         const response = await fetch(`/api/admin/table/${tableName}/row`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
+          body: JSON.stringify(nextPayload),
         });
         const j = await response.json().catch(() => ({}));
         if (!response.ok) {

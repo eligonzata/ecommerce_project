@@ -3,6 +3,7 @@ from __future__ import annotations
 import re
 from datetime import date, datetime
 from decimal import Decimal, InvalidOperation
+from urllib.parse import urlparse
 
 import bcrypt
 import mysql.connector
@@ -27,6 +28,8 @@ ADMIN_DASHBOARD_DISALLOWED_COLUMNS = {"users": ("password",)}
 ADMIN_WRITE_BLOCKED_COLUMNS = {
     "users": (),
 }
+
+DEFAULT_PRODUCT_IMAGE_PATH = "/img/logo.png"
 
 # --- helpers ---
 
@@ -189,6 +192,18 @@ def _writable_columns(meta: list[dict], table_name: str) -> list[dict]:
     return out
 
 
+def _is_valid_image_url(value) -> bool:
+    if not isinstance(value, str):
+        return False
+    s = value.strip()
+    if not s:
+        return False
+    if s.startswith("/"):
+        return True
+    parsed = urlparse(s)
+    return parsed.scheme in ("http", "https") and bool(parsed.netloc)
+
+
 @app.route("/multi-table-data", methods=["GET"])
 def get_tables_rows():
 
@@ -313,7 +328,13 @@ def admin_insert_row(table_name: str):
     insert_cols = []
     insert_vals = []
 
-    for key, raw in payload.items():
+    normalized_payload = dict(payload)
+    if table_name == "products":
+        image_url = normalized_payload.get("image_url")
+        if not _is_valid_image_url(image_url):
+            normalized_payload["image_url"] = DEFAULT_PRODUCT_IMAGE_PATH
+
+    for key, raw in normalized_payload.items():
         if key not in writable:
             abort(400, description=f"Unknown or non-writable column: {key}")
         col = writable[key]
@@ -331,8 +352,13 @@ def admin_insert_row(table_name: str):
 
     try:
         cursor.execute(sql, insert_vals)
-        conn.commit()
         new_id = cursor.lastrowid
+        if table_name == "products":
+            cursor.execute(
+                "INSERT INTO product_tags (product_id,tag_id) VALUES (%s, %s)",
+                (new_id, 1),
+            )
+        conn.commit()
     except mysql.connector.Error as e:
         conn.rollback()
         cursor.close()

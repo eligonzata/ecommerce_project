@@ -8,6 +8,21 @@ import Footer from "../../components/Footer";
 import { useAuth } from "@/context/AuthContext";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "/api";
+const DEFAULT_PRODUCT_IMAGE_PATH = "/img/logo.png";
+
+function resolveImageUrl(value) {
+  if (typeof value !== "string") return DEFAULT_PRODUCT_IMAGE_PATH;
+  const trimmed = value.trim();
+  if (!trimmed) return DEFAULT_PRODUCT_IMAGE_PATH;
+  if (trimmed.startsWith("/")) return trimmed;
+  try {
+    const parsed = new URL(trimmed);
+    if (parsed.protocol === "http:" || parsed.protocol === "https:") {
+      return trimmed;
+    }
+  } catch {}
+  return DEFAULT_PRODUCT_IMAGE_PATH;
+}
 
 export default function ProductPage() {
   const params = useParams();
@@ -17,6 +32,7 @@ export default function ProductPage() {
   const [status, setStatus] = useState("loading");
   const [userId, setUserId] = useState(null);
   const [addingToCart, setAddingToCart] = useState(false);
+  const [imageSrc, setImageSrc] = useState(DEFAULT_PRODUCT_IMAGE_PATH);
   const { user } = useAuth();
   useEffect(() => {
     if (user?.id) {
@@ -36,6 +52,7 @@ export default function ProductPage() {
       })
       .then((data) => {
         setProduct(data);
+        setImageSrc(resolveImageUrl(data.image));
         setStatus("ready");
       })
       .catch((err) => {
@@ -95,10 +112,11 @@ export default function ProductPage() {
           <div className="flex flex-col lg:flex-row items-center gap-10 p-6 lg:p-24">
             <div className="relative w-full lg:w-1/2 h-96">
               <Image
-                src={product.image || "/img/placeholder.png"}
+                src={imageSrc}
                 alt={product.name}
                 fill
                 className="object-cover rounded-md"
+                onError={() => setImageSrc(DEFAULT_PRODUCT_IMAGE_PATH)}
               />
             </div>
 

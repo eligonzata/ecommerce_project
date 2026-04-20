@@ -60,10 +60,11 @@ function CartContent() {
 
   const calculateDiscount = (subtotal) => {
     if (!discount) return 0;
+    const value = Number(discount.discount_value);
     if (discount.discount_type === "percentage") {
-      return subtotal * (discount.discount_value / 100);
+      return subtotal * (value / 100);
     } else {
-      return discount.discount_value;
+      return value;
     }
   };
 
